@@ -1,0 +1,1986 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>현,해린 이유식·유아식</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="현해린레시피">
+  <meta name="theme-color" content="#FF8264">
+  <link rel="apple-touch-icon" href="images/app.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FFF8F3;
+      --card: #FFFFFF;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+      --radius: 16px;
+      --baby-primary: #FF8264;
+      --baby-light: #FFF0EA;
+      --baby-text: #C45A3A;
+      --toddler-primary: #3FB89A;
+      --toddler-light: #E0F7F2;
+      --toddler-text: #1E7A64;
+      --text: #2A2A2A;
+      --muted: #888;
+      --border: #F0E8E0;
+      --header-h: 58px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      height: 100%; background: var(--bg);
+      font-family: 'Noto Sans KR', -apple-system, sans-serif;
+      color: var(--text); font-size: 16px; overflow-x: hidden;
+    }
+
+    /* ── Header ── */
+    #header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--header-h);
+      background: rgba(255,248,243,0.95); backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 16px; gap: 10px;
+    }
+    #back-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: transparent; cursor: pointer; display: none;
+      align-items: center; justify-content: center; font-size: 20px;
+    }
+    #back-btn.visible { display: flex; }
+    #header-title { font-size: 17px; font-weight: 700; flex: 1; }
+    #breadcrumb { font-size: 12px; color: var(--muted); }
+
+    /* ── Main ── */
+    #main {
+      margin-top: var(--header-h);
+      padding: 20px 16px;
+      padding-bottom: calc(24px + env(safe-area-inset-bottom));
+      min-height: calc(100vh - var(--header-h));
+    }
+
+    /* ── Pages ── */
+    .page { display: none; animation: fadeIn .25s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* ── Home Page ── */
+    .home-title { text-align: center; margin-bottom: 28px; }
+    .home-title h1 { font-size: 22px; font-weight: 700; color: var(--text); }
+    .home-title p { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .category-grid { display: grid; gap: 14px; }
+    .cat-card {
+      border-radius: 20px; padding: 28px 24px; cursor: pointer;
+      box-shadow: var(--shadow); border: none; text-align: left; width: 100%;
+      transition: transform .15s, box-shadow .15s;
+    }
+    .cat-card:active { transform: scale(.97); box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+    .cat-card.baby { background: linear-gradient(135deg, #FFEDE5, #FFD6C7); }
+    .cat-card.toddler { background: linear-gradient(135deg, #DFF7F0, #C5EDE3); }
+    .cat-emoji { font-size: 40px; margin-bottom: 12px; display: block; }
+    .cat-name { font-size: 22px; font-weight: 700; color: var(--text); }
+    .cat-desc { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    .cat-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+    .tag {
+      font-size: 12px; font-weight: 500; padding: 4px 10px;
+      border-radius: 20px; opacity: .8;
+    }
+    .baby .tag { background: rgba(255,130,100,.2); color: var(--baby-text); }
+    .toddler .tag { background: rgba(63,184,154,.2); color: var(--toddler-text); }
+    .adult .tag { background: rgba(120,80,180,.2); color: #6A3FAB; }
+    .cat-card.adult { background: linear-gradient(135deg, #EDE0FF, #D8C5F5); grid-column: 1 / -1; display: flex; align-items: center; gap: 20px; }
+    .cat-card.adult .cat-emoji { margin-bottom: 0; font-size: 44px; }
+    .cat-card.adult .cat-info { flex: 1; }
+    .cat-card.adult .cat-tags { margin-top: 10px; }
+
+    /* ── Sub-category Page ── */
+    .section-label { font-size: 13px; font-weight: 600; color: var(--muted); letter-spacing: .5px; text-transform: uppercase; margin-bottom: 14px; }
+    .sub-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .sub-card {
+      border-radius: 16px; padding: 20px 16px; cursor: pointer;
+      box-shadow: var(--shadow); border: 2px solid transparent;
+      transition: transform .15s, border-color .15s; background: var(--card);
+    }
+    .sub-card:active { transform: scale(.96); }
+    .sub-card.active-baby { border-color: var(--baby-primary); background: var(--baby-light); }
+    .sub-card.active-toddler { border-color: var(--toddler-primary); background: var(--toddler-light); }
+    .sub-emoji { font-size: 30px; margin-bottom: 8px; }
+    .sub-name { font-size: 16px; font-weight: 700; }
+    .sub-count { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+    /* ── Recipe List Page ── */
+    .group-section { margin-bottom: 18px; }
+    .group-header {
+      display: flex; align-items: center; gap: 10px;
+      padding: 14px 16px; border-radius: var(--radius);
+      cursor: pointer; user-select: none;
+      transition: opacity .15s;
+    }
+    .group-header:active { opacity: .75; }
+    .group-header.baby-group { background: var(--baby-light); }
+    .group-header.toddler-group { background: var(--toddler-light); }
+    .group-icon { font-size: 24px; }
+    .group-info { flex: 1; }
+    .group-name { font-size: 15px; font-weight: 700; }
+    .group-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .group-chevron { font-size: 14px; color: var(--muted); transition: transform .2s; }
+    .group-chevron.open { transform: rotate(90deg); }
+    .recipe-list { display: none; padding: 8px 0 4px 0; gap: 8px; flex-direction: column; }
+    .recipe-list.open { display: flex; }
+    .recipe-item {
+      background: var(--card); border-radius: 12px; padding: 14px 16px;
+      cursor: pointer; box-shadow: 0 1px 8px rgba(0,0,0,0.06);
+      display: flex; align-items: center; gap: 12px;
+      transition: transform .12s;
+    }
+    .recipe-item:active { transform: scale(.98); }
+    .recipe-item-info { flex: 1; }
+    .recipe-item-name { font-size: 15px; font-weight: 600; }
+    .recipe-item-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+    .recipe-item-badges { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+    .badge {
+      font-size: 11px; font-weight: 500; padding: 2px 8px;
+      border-radius: 10px;
+    }
+    .badge-age-baby { background: var(--baby-light); color: var(--baby-text); }
+    .badge-age-toddler { background: var(--toddler-light); color: var(--toddler-text); }
+    .badge-age-adult { background: #EDE0FF; color: #6A3FAB; }
+    .group-header.adult-group { background: #EDE0FF; }
+    .step-num.adult-num { background: #EDE0FF; color: #6A3FAB; }
+    .recipe-hero.adult-hero { background: linear-gradient(135deg, #EDE0FF, #D8C5F5); }
+    .tip-box.adult-tip { background: #EDE0FF; border-color: #9B6FD4; }
+    .badge-time { background: #F3F3F3; color: #666; }
+    .recipe-arrow { font-size: 14px; color: #CCC; }
+
+    /* ── Recipe Detail Page ── */
+    .recipe-hero {
+      border-radius: 20px; padding: 24px 20px; margin-bottom: 20px;
+      text-align: center;
+    }
+    .recipe-hero.baby-hero { background: linear-gradient(135deg, var(--baby-light), #FFD6C7); }
+    .recipe-hero.toddler-hero { background: linear-gradient(135deg, var(--toddler-light), #B8EDE3); }
+    .recipe-hero-emoji { font-size: 52px; margin-bottom: 12px; }
+    .recipe-hero-img {
+      width: 100%; max-height: 220px; object-fit: cover;
+      border-radius: 16px; margin-bottom: 14px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    .recipe-hero-name { font-size: 24px; font-weight: 700; }
+    .recipe-hero-badges { display: flex; justify-content: center; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    .recipe-hero-badge {
+      font-size: 13px; font-weight: 500; padding: 5px 12px;
+      border-radius: 20px; background: rgba(255,255,255,0.7);
+    }
+    .recipe-section {
+      background: var(--card); border-radius: var(--radius);
+      padding: 18px 16px; margin-bottom: 14px; box-shadow: var(--shadow);
+    }
+    .recipe-section-title {
+      font-size: 15px; font-weight: 700; margin-bottom: 14px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .ingredient-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .ingredient-item {
+      background: var(--bg); border-radius: 10px; padding: 10px 12px;
+    }
+    .ing-name { font-size: 13px; font-weight: 600; }
+    .ing-amount { font-size: 12px; color: var(--muted); margin-top: 2px; }
+    .step-item {
+      display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start;
+    }
+    .step-item:last-child { margin-bottom: 0; }
+    .step-num {
+      min-width: 28px; height: 28px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    .step-num.baby-num { background: var(--baby-light); color: var(--baby-text); }
+    .step-num.toddler-num { background: var(--toddler-light); color: var(--toddler-text); }
+    .step-text { font-size: 14px; line-height: 1.7; padding-top: 4px; }
+    .tip-box {
+      border-radius: 12px; padding: 14px 16px; margin-bottom: 14px;
+      border-left: 4px solid;
+    }
+    .tip-box.baby-tip { background: var(--baby-light); border-color: var(--baby-primary); }
+    .tip-box.toddler-tip { background: var(--toddler-light); border-color: var(--toddler-primary); }
+    .tip-title { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
+    .tip-text { font-size: 13px; line-height: 1.6; color: #555; }
+    .note-box { background: #F9F6F2; border-radius: 12px; padding: 14px 16px; font-size: 13px; color: #888; line-height: 1.7; }
+
+    /* ── PWA 설치 버튼 ── */
+    #install-btn {
+      display: none;
+      position: fixed; bottom: calc(20px + env(safe-area-inset-bottom));
+      right: 16px; z-index: 200;
+      background: linear-gradient(135deg, #FF8264, #FF6B6B);
+      color: white; border: none; border-radius: 24px;
+      padding: 12px 20px; font-size: 14px; font-weight: 700;
+      box-shadow: 0 4px 16px rgba(255,130,100,.45);
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      font-family: 'Noto Sans KR', sans-serif;
+    }
+    #install-btn.hidden { display: none !important; }
+    #install-btn:active { transform: scale(.96); }
+
+    /* ── iOS 안내 모달 ── */
+    #ios-modal {
+      display: none; position: fixed; inset: 0; z-index: 300;
+      background: rgba(0,0,0,.5); align-items: flex-end;
+    }
+    #ios-modal.open { display: flex; }
+    #ios-modal-box {
+      background: white; border-radius: 24px 24px 0 0;
+      padding: 28px 24px calc(24px + env(safe-area-inset-bottom));
+      width: 100%; animation: slideUp .3s ease;
+    }
+    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    #ios-modal-box h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; }
+    #ios-modal-box p { font-size: 13px; color: #666; line-height: 1.7; margin-bottom: 20px; }
+    .ios-steps { display: flex; flex-direction: column; gap: 12px; margin-bottom: 24px; }
+    .ios-step { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+    .ios-step-num {
+      min-width: 28px; height: 28px; border-radius: 50%;
+      background: var(--baby-light); color: var(--baby-text);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 13px; font-weight: 700; flex-shrink: 0;
+    }
+    #ios-close {
+      width: 100%; padding: 14px; border-radius: 14px; border: none;
+      background: #F0F0F0; font-size: 15px; font-weight: 600;
+      cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
+    }
+  </style>
+</head>
+<body>
+
+<!-- PWA 설치 버튼 -->
+<button id="install-btn" class="hidden" onclick="handleInstall()">
+  📲 앱으로 설치
+</button>
+
+<!-- iOS 안내 모달 -->
+<div id="ios-modal" onclick="closeIosModal(event)">
+  <div id="ios-modal-box">
+    <h3>📲 홈 화면에 추가하기</h3>
+    <p>아래 방법으로 앱처럼 바로가기를 만들 수 있어요!</p>
+    <div class="ios-steps">
+      <div class="ios-step"><div class="ios-step-num">1</div><span>하단 Safari <b>공유 버튼</b> (□↑) 탭</span></div>
+      <div class="ios-step"><div class="ios-step-num">2</div><span><b>홈 화면에 추가</b> 선택</span></div>
+      <div class="ios-step"><div class="ios-step-num">3</div><span>오른쪽 상단 <b>추가</b> 탭</span></div>
+    </div>
+    <button id="ios-close" onclick="document.getElementById('ios-modal').classList.remove('open')">확인</button>
+  </div>
+</div>
+
+<!-- Header -->
+<div id="header">
+  <button id="back-btn" onclick="goBack()">←</button>
+  <div>
+    <div id="header-title">🍼 현,해린 이유식·유아식</div>
+    <div id="breadcrumb"></div>
+  </div>
+</div>
+
+<!-- Main -->
+<div id="main">
+
+  <!-- 홈 -->
+  <div id="page-home" class="page active">
+    <div class="home-title">
+      <h1>현,해린 레시피 모음</h1>
+      <p>카테고리를 선택해 주세요</p>
+    </div>
+    <div class="category-grid">
+      <button class="cat-card baby" onclick="selectCategory('이유식')">
+        <span class="cat-emoji">🍼</span>
+        <div class="cat-name">이유식</div>
+        <div class="cat-desc">생후 4개월 ~ 12개월</div>
+        <div class="cat-tags">
+          <span class="tag">밥 (죽·진밥)</span>
+          <span class="tag">간식</span>
+        </div>
+      </button>
+      <button class="cat-card toddler" onclick="selectCategory('유아식')">
+        <span class="cat-emoji">🥣</span>
+        <div class="cat-name">유아식</div>
+        <div class="cat-desc">12개월 이후 ~ 36개월</div>
+        <div class="cat-tags">
+          <span class="tag">밥</span>
+          <span class="tag">국</span>
+          <span class="tag">반찬</span>
+          <span class="tag">간식</span>
+        </div>
+      </button>
+      <button class="cat-card adult" onclick="selectCategory('성인레시피')">
+        <span class="cat-emoji">🍽️</span>
+        <div class="cat-info">
+          <div class="cat-name">성인's 레시피</div>
+          <div class="cat-desc">어른을 위한 요리 모음</div>
+          <div class="cat-tags">
+            <span class="tag">요리</span>
+            <span class="tag">식사</span>
+            <span class="tag">찌개</span>
+            <span class="tag">디저트</span>
+            <span class="tag">음료</span>
+          </div>
+        </div>
+      </button>
+    </div>
+  </div>
+
+  <!-- 소카테고리 -->
+  <div id="page-sub" class="page"></div>
+
+  <!-- 레시피 목록 -->
+  <div id="page-list" class="page"></div>
+
+  <!-- 레시피 상세 -->
+  <div id="page-recipe" class="page"></div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────
+//  데이터
+// ─────────────────────────────────────────
+const DATA = {
+  '이유식': {
+    emoji: '🍼',
+    color: 'baby',
+    subs: {
+      '밥': {
+        emoji: '🍚',
+        count: '5가지 레시피',
+        groups: [
+          {
+            icon: '🌱',
+            name: '초기 이유식',
+            sub: '4~6개월 · 미음·묽은죽',
+            recipes: [
+              {
+                name: '쌀미음',
+                emoji: '🌾',
+                age: '4개월+',
+                time: '25분',
+                difficulty: '쉬움',
+                tip: '처음 이유식을 시작하는 아기에게 가장 적합한 기본 미음이에요. 쌀 외에 아무것도 넣지 않아야 해요.',
+                ingredients: [
+                  { name: '불린 쌀', amount: '1큰술 (15g)' },
+                  { name: '물', amount: '100ml' },
+                ],
+                steps: [
+                  '쌀을 깨끗이 씻어 물에 30분 이상 불린다.',
+                  '불린 쌀과 물을 믹서에 넣고 곱게 갈아준다.',
+                  '냄비에 갈아낸 쌀물을 넣고 중약불로 끓인다.',
+                  '끓기 시작하면 약불로 줄이고, 나무주걱으로 계속 저어가며 10분 더 끓인다.',
+                  '체에 걸러 부드럽게 만든 후 그릇에 담아낸다.',
+                  '36~37℃(손목 안쪽에 떨어뜨렸을 때 따뜻한 정도)로 식혀 먹인다.',
+                ]
+              },
+              {
+                name: '찹쌀미음',
+                emoji: '🫙',
+                age: '5개월+',
+                time: '25분',
+                difficulty: '쉬움',
+                tip: '찹쌀은 쌀보다 소화가 잘 되고 부드러운 식감이에요. 일반 쌀미음에 익숙해진 후 시작해요.',
+                ingredients: [
+                  { name: '불린 찹쌀', amount: '1큰술 (15g)' },
+                  { name: '물', amount: '100ml' },
+                ],
+                steps: [
+                  '찹쌀을 깨끗이 씻어 물에 30분 이상 불린다.',
+                  '불린 찹쌀과 물을 믹서에 넣고 곱게 갈아준다.',
+                  '냄비에 옮겨 중약불로 끓이며 계속 저어준다.',
+                  '찹쌀 특성상 잘 눋기 때문에 끊임없이 저어가며 끓인다.',
+                  '체에 걸러 그릇에 담고 식혀서 먹인다.',
+                ]
+              },
+            ]
+          },
+          {
+            icon: '🥕',
+            name: '중기 이유식',
+            sub: '7~9개월 · 야채죽',
+            recipes: [
+              {
+                name: '소고기당근죽',
+                emoji: '🥩',
+                age: '7개월+',
+                time: '35분',
+                difficulty: '보통',
+                tip: '소고기는 철분 보충에 중요해요. 핏물을 충분히 제거하고 곱게 갈아줘야 해요.',
+                ingredients: [
+                  { name: '불린 쌀', amount: '3큰술 (45g)' },
+                  { name: '소고기 (안심)', amount: '15g' },
+                  { name: '당근', amount: '10g' },
+                  { name: '물', amount: '200ml' },
+                ],
+                steps: [
+                  '소고기는 찬물에 30분 이상 담가 핏물을 제거한다.',
+                  '당근은 껍질 벗겨 작게 자른다.',
+                  '소고기와 당근을 각각 쪄서 부드럽게 익힌다.',
+                  '익힌 소고기는 믹서로 곱게 갈고, 당근도 믹서로 간다.',
+                  '불린 쌀과 물을 냄비에 넣고 중불로 끓인다.',
+                  '끓기 시작하면 갈아둔 소고기와 당근을 넣고 약불로 15분 더 끓인다.',
+                  '고루 섞어가며 끓이다가 죽이 완성되면 식혀서 먹인다.',
+                ]
+              },
+              {
+                name: '닭고기애호박죽',
+                emoji: '🐓',
+                age: '7개월+',
+                time: '35분',
+                difficulty: '보통',
+                tip: '닭고기는 소화가 잘 되는 단백질원이에요. 껍질과 지방을 제거하고 안심 부위를 사용해요.',
+                ingredients: [
+                  { name: '불린 쌀', amount: '3큰술 (45g)' },
+                  { name: '닭안심', amount: '15g' },
+                  { name: '애호박', amount: '10g' },
+                  { name: '물', amount: '200ml' },
+                ],
+                steps: [
+                  '닭안심은 찬물에 씻고 힘줄을 제거한다.',
+                  '닭안심을 푹 쪄서 익힌 후 찬물에 식혀 잘게 다진다.',
+                  '애호박은 껍질 벗겨 작게 자른 후 찐다.',
+                  '닭고기와 애호박을 각각 믹서로 곱게 간다.',
+                  '냄비에 불린 쌀과 물을 넣고 중불로 끓인다.',
+                  '끓으면 갈아둔 닭고기와 애호박을 넣고 약불에서 15분 더 끓인다.',
+                  '잘 저어가며 완성하고 식혀서 먹인다.',
+                ]
+              },
+              {
+                name: '브로콜리감자죽',
+                emoji: '🥦',
+                age: '7개월+',
+                time: '30분',
+                difficulty: '쉬움',
+                tip: '브로콜리는 비타민 C와 칼슘이 풍부해요. 꽃 부분만 사용하고, 너무 오래 익히면 색이 변해요.',
+                ingredients: [
+                  { name: '불린 쌀', amount: '3큰술 (45g)' },
+                  { name: '브로콜리 (꽃 부분)', amount: '15g' },
+                  { name: '감자', amount: '10g' },
+                  { name: '물', amount: '200ml' },
+                ],
+                steps: [
+                  '브로콜리는 꽃 부분만 떼어 깨끗이 씻는다.',
+                  '감자는 껍질을 벗기고 작게 자른다.',
+                  '브로콜리와 감자를 각각 쪄서 익힌다.',
+                  '브로콜리와 감자를 각각 믹서로 곱게 간다.',
+                  '냄비에 불린 쌀과 물을 넣고 중불로 끓인다.',
+                  '끓기 시작하면 갈아둔 채소를 넣고 약불에서 15분 더 끓인다.',
+                  '잘 섞어가며 완성한 후 식혀서 먹인다.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🍚',
+            name: '후기 이유식',
+            sub: '10~12개월 · 진밥·무른밥',
+            recipes: [
+              {
+                name: '소고기채소진밥',
+                emoji: '🥩',
+                age: '10개월+',
+                time: '40분',
+                difficulty: '보통',
+                tip: '진밥은 쌀과 물 비율이 1:3 정도로, 죽보다 되직하게 만들어요. 씹는 연습을 시작하는 단계예요.',
+                ingredients: [
+                  { name: '불린 쌀', amount: '4큰술 (60g)' },
+                  { name: '소고기 (다짐육)', amount: '20g' },
+                  { name: '당근', amount: '15g' },
+                  { name: '애호박', amount: '15g' },
+                  { name: '물', amount: '180ml' },
+                ],
+                steps: [
+                  '소고기는 핏물을 빼고 곱게 다진다.',
+                  '당근과 애호박은 껍질 벗겨 5mm 크기로 작게 썬다.',
+                  '냄비에 참기름 반방울 두르고 소고기를 볶다가 물을 넣는다.',
+                  '불린 쌀을 넣고 중약불로 끓인다.',
+                  '끓기 시작하면 다진 당근과 애호박을 넣는다.',
+                  '약불에서 20분 더 끓이며 저어준다.',
+                  '쌀알이 무르고 채소가 푹 익으면 완성. 식혀서 먹인다.',
+                ]
+              },
+            ]
+          }
+        ]
+      },
+      '간식': {
+        emoji: '🍎',
+        count: '4가지 레시피',
+        groups: [
+          {
+            icon: '🍑',
+            name: '과일 간식',
+            sub: '소화 잘 되는 달콤한 간식',
+            recipes: [
+              {
+                name: '사과배퓨레',
+                emoji: '🍎',
+                age: '5개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '사과와 배는 소화를 돕는 효소가 있어요. 단맛이 있어 아기들이 좋아해요.',
+                ingredients: [
+                  { name: '사과', amount: '1/4개' },
+                  { name: '배', amount: '1/4개' },
+                  { name: '물', amount: '2큰술' },
+                ],
+                steps: [
+                  '사과와 배를 깨끗이 씻어 껍질과 씨를 제거한다.',
+                  '작은 크기로 자른다.',
+                  '찜기에 넣고 10분 정도 부드럽게 찐다.',
+                  '믹서에 찐 과일과 물을 넣고 곱게 간다.',
+                  '체에 한 번 걸러 부드럽게 만든 후 상온으로 식혀 먹인다.',
+                  '* 먹이기 전 소량씩 시작하여 알레르기 반응을 확인한다.',
+                ]
+              },
+              {
+                name: '바나나퓨레',
+                emoji: '🍌',
+                age: '6개월+',
+                time: '5분',
+                difficulty: '쉬움',
+                tip: '바나나는 익히지 않아도 되는 가장 간편한 이유식 재료예요. 단, 잘 익은 것을 사용해요.',
+                ingredients: [
+                  { name: '바나나 (잘 익은 것)', amount: '1/3개' },
+                  { name: '모유 또는 분유물', amount: '1큰술 (선택)' },
+                ],
+                steps: [
+                  '바나나를 작은 조각으로 자른다.',
+                  '포크로 곱게 으깬다.',
+                  '더 부드럽게 만들려면 소량의 모유나 분유물을 넣고 섞는다.',
+                  '즉시 먹인다. (변색되므로 미리 만들지 않는다)',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🍠',
+            name: '채소 간식',
+            sub: '영양 가득 달콤한 채소',
+            recipes: [
+              {
+                name: '찐고구마',
+                emoji: '🍠',
+                age: '6개월+',
+                time: '25분',
+                difficulty: '쉬움',
+                tip: '고구마는 식이섬유와 베타카로틴이 풍부해요. 변비에 효과적이에요.',
+                ingredients: [
+                  { name: '고구마', amount: '중간 크기 1/3개 (50g)' },
+                ],
+                steps: [
+                  '고구마를 깨끗이 씻어 껍질을 벗긴다.',
+                  '찜기에 물을 붓고 고구마를 넣어 20분 정도 찐다.',
+                  '젓가락을 찔러보아 부드럽게 들어가면 완성.',
+                  '초기: 포크로 으깨 물이나 모유를 조금 넣어 퓨레 형태로',
+                  '중기 이후: 으깬 상태로 그대로 제공',
+                  '식혀서 적당량 먹인다.',
+                ]
+              },
+              {
+                name: '단호박찜',
+                emoji: '🎃',
+                age: '7개월+',
+                time: '30분',
+                difficulty: '쉬움',
+                tip: '단호박은 당도가 높아 아기들이 좋아해요. 베타카로틴이 풍부하게 들어있어요.',
+                ingredients: [
+                  { name: '단호박', amount: '50g (작은 조각)' },
+                  { name: '물', amount: '1큰술 (퓨레 시)' },
+                ],
+                steps: [
+                  '단호박은 씨와 껍질을 제거하고 작게 자른다.',
+                  '찜기에 10~15분 정도 쪄서 부드럽게 만든다.',
+                  '초기: 믹서에 갈아 퓨레 형태로',
+                  '중기: 포크로 으깨어 덩어리째 제공',
+                  '후기: 작게 썰어 손으로 집어 먹을 수 있는 크기로 제공',
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+
+  '유아식': {
+    emoji: '🥣',
+    color: 'toddler',
+    subs: {
+      '밥': {
+        emoji: '🍳',
+        count: '11가지 레시피',
+        groups: [
+          {
+            icon: '🍳',
+            name: '볶음밥·비빔밥',
+            sub: '아이가 좋아하는 한 그릇 밥',
+            recipes: [
+              {
+                name: '소고기야채볶음밥',
+                emoji: '🥩',
+                age: '12개월+',
+                time: '20분',
+                difficulty: '보통',
+                tip: '소금 대신 저염 간장을 아주 소량 사용해요. 채소는 최대한 작게 썰어야 잘 먹어요.',
+                ingredients: [
+                  { name: '밥', amount: '어린이 공기 1/2 (90g)' },
+                  { name: '소고기 다짐육', amount: '30g' },
+                  { name: '당근', amount: '15g' },
+                  { name: '양파', amount: '15g' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '참기름', amount: '1/2작은술' },
+                  { name: '저염 간장', amount: '1/4작은술' },
+                ],
+                steps: [
+                  '당근과 양파를 3~4mm 크기로 잘게 다진다.',
+                  '소고기는 핏물을 제거하고 잘게 다진다.',
+                  '달군 팬에 참기름을 두르고 소고기를 볶다가 당근, 양파를 넣어 함께 볶는다.',
+                  '채소가 투명해지면 밥을 넣고 고루 볶는다.',
+                  '달걀을 풀어 넣고 빠르게 섞어가며 볶는다.',
+                  '저염 간장을 가장자리에 두르고 한번 더 볶아 마무리.',
+                  '너무 뜨겁지 않게 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '달걀채소비빔밥',
+                emoji: '🥚',
+                age: '12개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '달걀은 완전히 익혀야 해요. 아직 소화력이 약하니 채소를 충분히 부드럽게 익혀주세요.',
+                ingredients: [
+                  { name: '밥', amount: '어린이 공기 1/2 (90g)' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '당근', amount: '20g' },
+                  { name: '시금치', amount: '20g' },
+                  { name: '참기름', amount: '1/2작은술' },
+                  { name: '저염 간장', amount: '1/4작은술' },
+                ],
+                steps: [
+                  '당근은 가늘게 채 썰어 참기름에 살짝 볶는다.',
+                  '시금치는 끓는 물에 30초 데쳐 찬물에 헹궈 물기 짜고 잘게 다진다.',
+                  '달걀을 풀어 스크램블드에그 형태로 완전히 익힌다.',
+                  '그릇에 밥을 담고 당근, 시금치, 달걀을 올린다.',
+                  '참기름과 저염 간장을 넣고 잘 비벼서 준다.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🍚',
+            name: '일반 밥류',
+            sub: '간단하게 만드는 영양 밥',
+            recipes: [
+              {
+                name: '참치계란덮밥',
+                emoji: '🐟',
+                age: '18개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '참치는 저염·저염 제품을 선택하고, 기름을 충분히 제거해요. 나트륨 섭취에 주의하세요.',
+                ingredients: [
+                  { name: '밥', amount: '어린이 공기 1/2 (90g)' },
+                  { name: '참치캔 (저염)', amount: '30g' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '애호박', amount: '20g' },
+                  { name: '참기름', amount: '1/4작은술' },
+                ],
+                steps: [
+                  '참치캔은 체에 밭쳐 기름을 충분히 제거한다.',
+                  '애호박은 작은 반달 모양으로 썬다.',
+                  '팬에 참기름 두르고 애호박을 먼저 볶는다.',
+                  '애호박이 익으면 참치를 넣고 살짝 볶는다.',
+                  '달걀을 풀어서 반숙이 되도록 익히며 섞는다.',
+                  '밥 위에 올려 덮밥으로 제공한다.',
+                ]
+              },
+              {
+                name: '치킨마요 덮밥',
+                emoji: '🍗',
+                image: 'images/mayo.jpg',
+                age: '18개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                tip: '냉동 치킨너겟을 활용하면 재료 손질 없이 10분 컷! 원팬 요리라 설거지도 최소예요.',
+                ingredients: [
+                  { name: '치킨너겟 (냉동)', amount: '3~4개' },
+                  { name: '밥', amount: '반 공기' },
+                  { name: '계란', amount: '1개' },
+                  { name: '대파', amount: '조금' },
+                  { name: '간장', amount: '1작은술' },
+                  { name: '올리고당', amount: '1작은술' },
+                  { name: '마요네즈', amount: '1큰술' },
+                  { name: '김가루', amount: '1큰술' },
+                  { name: '깨', amount: '약간' },
+                ],
+                steps: [
+                  '팬을 반으로 나눠 한쪽은 치킨너겟을 굽고, 다른 쪽은 대파를 잘게 잘라 넣은 달걀로 스크램블을 만든다.',
+                  '구운 너겟을 한 입 크기로 썰어 간장, 올리고당을 넣고 졸인다.',
+                  '그릇에 밥을 담고 너겟, 스크램블 계란, 김가루, 깨, 마요네즈 순으로 올리면 완성.',
+                ]
+              },
+              {
+                name: '어니언스프',
+                emoji: '🧅',
+                image: 'images/toddler/rice/13.jpg',
+                age: '12개월+',
+                time: '40분',
+                difficulty: '보통',
+                tip: '양파 볶기가 맛의 핵심이에요. 중약불에서 천천히 15~25분 볶아 갈색이 돌 때까지 볶아야 단맛이 확 올라와요. 바닥이 눌어붙기 시작하면 물 1~2큰술로 훑어주면 풍미가 더 좋아져요. 2~3회분 기준 레시피예요.',
+                ingredients: [
+                  { name: '양파', amount: '2~3개' },
+                  { name: '버터', amount: '10g (또는 올리브오일 1큰술)' },
+                  { name: '물 또는 채수·다시마물', amount: '500ml' },
+                  { name: '우유 (또는 두유·오트밀크)', amount: '100~150ml (선택)' },
+                  { name: '치즈', amount: '취향껏 (선택)' },
+                ],
+                steps: [
+                  '양파는 얇게 채 썬다. (얇을수록 단맛이 빨리 올라옴)',
+                  '냄비에 버터(또는 오일)를 넣고 중약불로 달군다.',
+                  '양파를 넣고 처음 5분은 살짝 숨만 죽이고, 이후 중불로 15~25분 천천히 볶는다.',
+                  '중간중간 저어가며 갈색이 살짝 돌 때까지 볶는다. (바닥이 눌어붙으면 물 1~2큰술로 훑어주기)',
+                  '우유와 물(또는 채수) 600ml를 붓고 15~20분 더 끓인다.',
+                  '블렌더로 갈아 스프 질감으로 만든다. (아이 취향에 따라 생략 가능)',
+                  '아이는 식빵 찍먹, 어른은 소금·후추·치즈를 올려 제공한다.',
+                ]
+              },
+              {
+                name: '두부계란죽',
+                emoji: '🥣',
+                image: 'images/toddler/rice/7.jpg',
+                age: '12개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                tip: '전자레인지로 3분이면 완성되는 초간단 영양죽이에요. 간장은 아이 월령에 맞게 아주 소량만 사용하세요. 두부를 잘 으깨야 부드럽게 완성돼요.',
+                ingredients: [
+                  { name: '두부', amount: '70g' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '밥', amount: '80g' },
+                  { name: '채수', amount: '100ml' },
+                  { name: '아기간장', amount: '약간' },
+                ],
+                steps: [
+                  '찜기에 두부를 넣고 으깨준다.',
+                  '달걀을 풀어 으깬 두부와 잘 섞는다.',
+                  '밥, 채수, 아기간장을 넣고 함께 섞는다.',
+                  '전자레인지에 3분 돌리면 완성.',
+                ]
+              },
+              {
+                name: '버섯마요덮밥',
+                emoji: '🍄',
+                image: 'images/toddler/rice/5.jpg',
+                age: '18개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '버섯은 잘게 다질수록 더 맛있어요. 간장 양은 아이 월령에 맞게 조절하세요. 마요네즈 대신 참기름을 올려도 맛있어요!',
+                ingredients: [
+                  { name: '새송이버섯', amount: '5개' },
+                  { name: '달걀', amount: '4개' },
+                  { name: '무염버터', amount: '15g' },
+                  { name: '현미유', amount: '약간' },
+                  { name: '마요네즈', amount: '적당량' },
+                  { name: '김가루', amount: '적당량' },
+                  { name: '간장', amount: '2큰술' },
+                  { name: '올리고당', amount: '1.5큰술' },
+                  { name: '밥', amount: '1공기' },
+                ],
+                steps: [
+                  '새송이버섯을 잘게 다진다.',
+                  '간장과 올리고당을 섞어 양념을 만들어 둔다.',
+                  '달걀을 곱게 풀어 준비한다.',
+                  '팬에 현미유를 살짝 두르고 달걀 스크램블을 만들어 따로 덜어둔다.',
+                  '같은 팬에 현미유를 살짝 두르고 버섯을 볶는다.',
+                  '버섯의 수분이 완전히 날아가면 무염버터를 넣어 함께 볶는다.',
+                  '만들어 둔 양념을 추가하고 노릇해질 때까지 충분히 볶는다.',
+                  '밥 위에 스크램블 달걀, 버섯볶음, 김가루, 마요네즈를 올려 마무리한다.',
+                ]
+              },
+              {
+                name: '애호박 명란 덮밥',
+                emoji: '💚',
+                image: 'images/toddler/rice/1.jpg',
+                age: '18개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '명란은 나트륨이 있으니 물에 충분히 해동해 짠기를 줄여요. 참치액은 소량만 사용하고 물로 농도를 조절하면 아이 입맛에 딱 맞아요.',
+                ingredients: [
+                  { name: '애호박', amount: '1개' },
+                  { name: '명란', amount: '3줄' },
+                  { name: '물', amount: '100ml' },
+                  { name: '참치액', amount: '1큰술' },
+                  { name: '현미유', amount: '약간' },
+                  { name: '참기름', amount: '약간' },
+                  { name: '깨', amount: '약간' },
+                  { name: '밥', amount: '1공기' },
+                ],
+                steps: [
+                  '명란은 물에 담가 해동한다.',
+                  '애호박은 채 썰어 준비한다.',
+                  '해동된 명란은 잘게 썬다. (껍질 벗겨 사용해도 됨)',
+                  '팬에 현미유를 두르고 애호박을 볶는다.',
+                  '애호박이 익으면 명란을 넣고 함께 볶는다.',
+                  '물과 참치액을 넣고 한번 끓인다.',
+                  '완성된 애호박 명란 볶음을 밥 위에 얹고 참기름을 두른 뒤 깨를 뿌려 마무리.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🌸',
+            name: '도시락·주먹밥',
+            sub: '소풍·나들이 도시락',
+            recipes: [
+              {
+                name: '소세지꽃주먹밥',
+                emoji: '🌸',
+                image: 'images/sogage-jumeokbap.jpg',
+                age: '18개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '밥은 채소와 따로 비벼야 모양 잡기가 쉬워요. 참기름을 너무 많이 넣으면 뭉치지 않아요. 후리가케로 대체하면 시간을 훨씬 단축할 수 있어요!',
+                ingredients: [
+                  { name: '비엔나소세지 (얇은 것)', amount: '적당량' },
+                  { name: '밥', amount: '1공기' },
+                  { name: '애호박', amount: '약간' },
+                  { name: '당근', amount: '약간' },
+                  { name: '양파', amount: '약간' },
+                  { name: '소금', amount: '약간' },
+                  { name: '참기름', amount: '소량' },
+                  { name: '케찹', amount: '약간 (마무리용)' },
+                ],
+                steps: [
+                  '소세지를 반으로 자른 뒤, 자른 면에 8등분으로 칼집을 1/4 깊이만 넣어 꽃 모양을 만든다.',
+                  '끓는 물에 소세지를 30초~1분 데쳐 칼집이 벌어지면 건져낸다. (과하게 익히면 모양이 퍼짐)',
+                  '호박·당근·양파를 잘게 다진 후 기름 두른 팬에 소금으로 간해 볶는다.',
+                  '볶은 채소와 밥을 소금·참기름(소량)과 함께 고루 섞어 주먹밥 밥을 만든다.',
+                  '밥을 손으로 뭉쳐 공 모양을 만들고, 가운데를 살짝 눌러 구멍을 낸다.',
+                  '구멍에 소세지를 꽃 방향이 위로 오게 꽂고 다시 모양을 잡는다.',
+                  '꽃 가운데에 케찹을 콕 찍어 마무리한다.',
+                  '💡 후리가케로 밥을 비비면 채소 볶는 과정을 생략할 수 있어요!',
+                ]
+              },
+              {
+                name: '스팸계란 김밥',
+                emoji: '🍱',
+                image: 'images/toddler/rice/15.jpg',
+                age: '18개월+',
+                time: '30분',
+                difficulty: '보통',
+                tip: '스팸은 뜨거운 물에 한 번 헹궈 나트륨을 줄여요. 으깨서 볶으면 한입 김밥에 고르게 넣기 좋아요. 3줄 기준 레시피예요.',
+                ingredients: [
+                  { name: '스팸', amount: '1캔 (200g)' },
+                  { name: '달걀', amount: '3개' },
+                  { name: '소금', amount: '세 꼬집' },
+                  { name: '밥', amount: '2공기' },
+                  { name: '김밥용 김', amount: '3장' },
+                  { name: '간장', amount: '1큰술' },
+                  { name: '굴소스', amount: '0.5큰술' },
+                  { name: '올리고당', amount: '0.5큰술' },
+                  { name: '다진마늘', amount: '1큰술' },
+                  { name: '깨소금', amount: '1큰술' },
+                  { name: '참기름', amount: '1큰술' },
+                  { name: '식용유', amount: '약간' },
+                ],
+                steps: [
+                  '스팸을 뜨거운 물에 한 번 헹군 뒤 으깨준다.',
+                  '팬에 으깬 스팸을 노릇바삭하게 볶는다.',
+                  '다진마늘, 간장, 굴소스, 올리고당을 넣고 섞어가며 볶아 마무리한다.',
+                  '달걀 3개에 소금 세 꼬집을 넣고 풀어, 기름 두른 팬에 부드럽게 스크램블을 만든다.',
+                  '밥 2공기에 볶은 스팸, 스크램블, 깨소금, 참기름을 넣고 고루 섞는다.',
+                  '김밥용 김 위에 밥을 얇게 펴고 돌돌 말아준다.',
+                  '참기름을 바르고 먹기 좋게 썰어 완성한다.',
+                ]
+              },
+              {
+                name: '오이당근 크래미김밥',
+                emoji: '🍱',
+                image: 'images/toddler/rice/14.jpg',
+                age: '18개월+',
+                time: '30분',
+                difficulty: '보통',
+                tip: '오이 물기를 꼭 제거해야 김밥이 터지지 않아요. 당근은 오래 볶지 말고 아삭함을 살려야 식감이 좋아요. 오이 대신 단무지를 넣어도 맛있어요. 3줄 기준 레시피예요.',
+                ingredients: [
+                  { name: '밥', amount: '2공기' },
+                  { name: '김밥용 김', amount: '3장' },
+                  { name: '오이', amount: '1개' },
+                  { name: '당근', amount: '1개' },
+                  { name: '크래미', amount: '100g' },
+                  { name: '마요네즈', amount: '1.5큰술' },
+                  { name: '소금', amount: '약간' },
+                  { name: '후추', amount: '약간' },
+                  { name: '참기름', amount: '1큰술' },
+                  { name: '오일', amount: '1큰술' },
+                ],
+                steps: [
+                  '오이를 얇게 썰고 소금 두 꼬집을 뿌려 10분 절인 뒤 물기를 꽉 짠다.',
+                  '당근을 얇게 채 썰어 오일 두른 팬에 소금 한 꼬집 넣고 2분 아삭하게 볶는다.',
+                  '크래미를 결대로 찢고 마요네즈, 후추를 넣어 가볍게 섞는다.',
+                  '밥 2공기에 소금 두 꼬집, 참기름을 넣고 고루 섞는다.',
+                  '김 위에 밥을 얇게 펴고 김 반 장을 올린다. (선택)',
+                  '오이 → 당근 → 크래미 순으로 올려 돌돌 말아준다.',
+                  '겉에 참기름을 살짝 바르고 먹기 좋게 썰어 완성한다.',
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      '국': {
+        emoji: '🍲',
+        count: '3가지 레시피',
+        groups: [
+          {
+            icon: '🌿',
+            name: '맑은 국',
+            sub: '깔끔한 국물 요리',
+            recipes: [
+              {
+                name: '달걀국',
+                emoji: '🥚',
+                age: '12개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '멸치육수는 소금 없이 우려내면 나트륨이 낮아요. 달걀은 실처럼 얇게 풀어 넣어야 부드러워요.',
+                ingredients: [
+                  { name: '달걀', amount: '1개' },
+                  { name: '멸치육수 (무염)', amount: '200ml' },
+                  { name: '당근', amount: '10g' },
+                  { name: '대파', amount: '약간' },
+                ],
+                steps: [
+                  '멸치육수를 끓인다. (멸치 3~4개 + 물 250ml, 5분 끓이고 건져냄)',
+                  '당근은 작은 나박 모양으로 자른다.',
+                  '육수가 끓으면 당근을 넣고 2~3분 익힌다.',
+                  '달걀을 잘 풀어서 얇게 끓는 국물에 저어가며 천천히 붓는다.',
+                  '달걀이 익으면 불을 끄고, 대파를 아주 조금 넣는다.',
+                  '아이 그릇에 담기 전에 한 번 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '미역국',
+                emoji: '🌊',
+                age: '18개월+',
+                time: '30분',
+                difficulty: '보통',
+                tip: '아이용 미역국은 간을 거의 하지 않아요. 국간장 1~2방울이면 충분해요.',
+                ingredients: [
+                  { name: '건미역', amount: '3g (물에 불리면 30g)' },
+                  { name: '소고기 (양지)', amount: '20g' },
+                  { name: '물', amount: '300ml' },
+                  { name: '참기름', amount: '1/4작은술' },
+                  { name: '국간장', amount: '1~2방울 (선택)' },
+                ],
+                steps: [
+                  '건미역을 찬물에 20분 불린 후 물기를 짜고 3cm 길이로 자른다.',
+                  '소고기는 핏물 빼고 작게 썬다.',
+                  '냄비에 참기름 두르고 소고기를 볶는다.',
+                  '소고기가 반쯤 익으면 미역을 넣고 함께 볶는다.',
+                  '물을 붓고 중불로 20분 끓인다.',
+                  '기호에 따라 국간장 1~2방울로 아주 약하게 간한다.',
+                  '식혀서 밥과 함께 제공한다.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🍲',
+            name: '된장국류',
+            sub: '구수하고 영양 가득',
+            recipes: [
+              {
+                name: '순두부된장국',
+                emoji: '🫘',
+                age: '18개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '된장은 나트륨이 높아 아주 소량만 사용해요. 시판 된장보다 저염 된장을 권장해요.',
+                ingredients: [
+                  { name: '순두부', amount: '80g' },
+                  { name: '멸치육수 (무염)', amount: '200ml' },
+                  { name: '저염 된장', amount: '1/4작은술' },
+                  { name: '애호박', amount: '15g' },
+                  { name: '감자', amount: '15g' },
+                ],
+                steps: [
+                  '감자와 애호박을 1cm 크기로 깍둑 썬다.',
+                  '멸치육수를 끓이다가 된장을 넣고 잘 녹인다.',
+                  '감자를 먼저 넣고 5분 끓인다.',
+                  '애호박과 순두부를 넣고 3~5분 더 끓인다.',
+                  '순두부는 크게 덩어리지지 않도록 숟가락으로 자르며 넣는다.',
+                  '너무 뜨겁지 않게 식혀서 밥과 제공한다.',
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      '반찬': {
+        emoji: '🥗',
+        count: '10가지 레시피',
+        groups: [
+          {
+            icon: '🥚',
+            name: '달걀 요리',
+            sub: '단백질 풍부한 달걀 반찬',
+            recipes: [
+              {
+                name: '부드러운 계란찜',
+                emoji: '🥚',
+                age: '12개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '계란찜은 커스터드처럼 부드럽게 만들어야 아이가 잘 먹어요. 육수 비율이 중요해요.',
+                ingredients: [
+                  { name: '달걀', amount: '2개' },
+                  { name: '멸치육수 (무염)', amount: '100ml' },
+                  { name: '당근', amount: '10g (선택)' },
+                ],
+                steps: [
+                  '달걀을 곱게 풀어 체에 한 번 걸러 알끈을 제거한다.',
+                  '멸치육수를 달걀물에 넣고 잘 섞는다.',
+                  '당근을 아주 작게 다져 함께 넣어도 좋다.',
+                  '내열용 그릇에 담고 랩으로 느슨하게 덮는다.',
+                  '찜기에서 약 12~15분 쪄낸다. (물이 끓은 후 약불)',
+                  '젓가락으로 찔렀을 때 맑은 물이 나오면 완성.',
+                  '식혀서 제공한다.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🫘',
+            name: '두부 요리',
+            sub: '칼슘 풍부한 두부 반찬',
+            recipes: [
+              {
+                name: '두부달걀조림',
+                emoji: '🫘',
+                age: '12개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '두부는 물기를 충분히 빼야 으깨지지 않아요. 조리 시 간장은 최소량만 사용해요.',
+                ingredients: [
+                  { name: '두부 (단단한 것)', amount: '1/4모 (80g)' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '저염 간장', amount: '1/3작은술' },
+                  { name: '참기름', amount: '1/4작은술' },
+                  { name: '물', amount: '2큰술' },
+                ],
+                steps: [
+                  '두부를 키친타올로 감싸 물기를 제거한 후 1cm 두께로 썬다.',
+                  '팬에 참기름을 두르고 두부를 넣어 중불로 앞뒤 2분씩 굽는다.',
+                  '두부가 노릇해지면 달걀 푼 것을 넣어 코팅하듯 익힌다.',
+                  '물과 저염 간장을 섞어 넣고 졸인다.',
+                  '국물이 거의 없어지면 불을 끄고 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '두부야채볶음',
+                emoji: '🥦',
+                age: '15개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '두부는 미리 구워놓으면 으깨지지 않아 먹기 좋아요.',
+                ingredients: [
+                  { name: '두부', amount: '1/4모 (80g)' },
+                  { name: '당근', amount: '20g' },
+                  { name: '양파', amount: '20g' },
+                  { name: '참기름', amount: '1/3작은술' },
+                  { name: '저염 간장', amount: '1/4작은술' },
+                ],
+                steps: [
+                  '두부는 물기 제거 후 작게 깍둑 썬다.',
+                  '당근, 양파도 5mm 크기로 잘게 썬다.',
+                  '팬에 참기름을 두르고 당근, 양파를 먼저 볶는다.',
+                  '채소가 익으면 두부를 넣고 으깨지지 않도록 살살 볶는다.',
+                  '저염 간장을 가장자리에 두르고 한번 더 볶아 마무리.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🥦',
+            name: '채소 요리',
+            sub: '비타민 가득 채소 반찬',
+            recipes: [
+              {
+                name: '시금치나물',
+                emoji: '🌿',
+                age: '12개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                tip: '시금치는 데친 후 찬물에 바로 헹궈야 색이 예뻐요. 아이용은 간을 거의 하지 않아요.',
+                ingredients: [
+                  { name: '시금치', amount: '60g' },
+                  { name: '참기름', amount: '1/4작은술' },
+                  { name: '저염 간장', amount: '1~2방울' },
+                ],
+                steps: [
+                  '시금치를 깨끗이 씻는다.',
+                  '끓는 물에 시금치를 넣고 30초~1분 데친다.',
+                  '찬물에 바로 헹궈 물기를 꼭 짠다.',
+                  '2~3cm 길이로 자른다.',
+                  '참기름과 저염 간장을 넣고 조물조물 무친다.',
+                  '참깨를 살짝 뿌려도 좋다.',
+                ]
+              },
+              {
+                name: '당근볶음',
+                emoji: '🥕',
+                age: '12개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                tip: '당근은 기름에 볶으면 베타카로틴 흡수가 높아져요. 부드럽게 익혀야 씹기 쉬워요.',
+                ingredients: [
+                  { name: '당근', amount: '1/2개 (100g)' },
+                  { name: '참기름', amount: '1/4작은술' },
+                  { name: '저염 간장', amount: '1/4작은술' },
+                  { name: '물', amount: '1큰술' },
+                ],
+                steps: [
+                  '당근은 껍질을 벗겨 3~4mm 두께로 얇게 채 썬다.',
+                  '팬에 참기름을 두르고 당근을 넣어 볶는다.',
+                  '당근이 익기 시작하면 물을 넣고 뚜껑을 덮어 3분 더 익힌다.',
+                  '저염 간장을 넣고 국물이 없어질 때까지 볶는다.',
+                  '부드럽게 익혔는지 확인하고 식혀서 제공한다.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🥩',
+            name: '고기 요리',
+            sub: '든든한 단백질 고기 반찬',
+            recipes: [
+              {
+                name: '브로콜리 후리카케',
+                emoji: '🥦',
+                image: 'images/toddler/side/12.jpg',
+                age: '12개월+',
+                time: '40분',
+                difficulty: '쉬움',
+                tip: '한 번 만들어두면 주먹밥, 볶음밥까지 계속 활용할 수 있어요. 물기를 완전히 제거해야 바삭하게 건조돼요. 김은 먹을 때 그때그때 부셔서 섞어야 눅눅해지지 않아요.',
+                ingredients: [
+                  { name: '브로콜리', amount: '1통' },
+                  { name: '김', amount: '1~2장' },
+                  { name: '참깨', amount: '소량 (선택)' },
+                ],
+                steps: [
+                  '브로콜리 송이만 떼어내고 끓는 물에 30초 데친다.',
+                  '키친타월로 물기를 꽉 짠다. (물기가 남으면 건조가 아니라 쪄짐)',
+                  '에어프라이어에 종이호일을 깔고 브로콜리를 얇게 펼친다.',
+                  '140~150도에서 25~30분, 중간에 한 번 뒤집으며 바삭하게 건조한다.',
+                  '완전히 식힌 뒤 밥알보다 작게 아주 잘게 다진다.',
+                  '먹을 때 김을 그때그때 부셔서 후리카케와 섞고, 취향에 따라 참깨를 넣는다.',
+                ]
+              },
+              {
+                name: '감자전 계란말이',
+                emoji: '🥔',
+                image: 'images/toddler/side/10.jpg',
+                age: '12개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '감자전분을 따로 뺄 필요 없어요! 필러로 얇게 썰면 자연스럽게 전분이 살아 바삭하게 완성돼요. 치즈를 올리면 아이가 더 잘 먹어요.',
+                ingredients: [
+                  { name: '감자', amount: '1개' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '버터', amount: '1개 (한 조각)' },
+                  { name: '버섯 (또는 취향 야채)', amount: '약간' },
+                  { name: '아기치즈', amount: '1장 (선택)' },
+                ],
+                steps: [
+                  '감자 껍질을 필러로 깨끗하게 벗긴다.',
+                  '팬에 버터를 올려 녹인다.',
+                  '버터가 녹으면 그 위로 감자를 필러로 얇게 썰어 올린다.',
+                  '감자가 어느 정도 노릇해지면 달걀을 위에 톡 깨서 올린다.',
+                  '취향껏 버섯이나 치즈를 함께 올린다.',
+                  '그대로 감자전으로 먹거나, 계란말이처럼 돌돌 말아서 완성한다.',
+                ]
+              },
+              {
+                name: '두부버섯스프',
+                emoji: '🍄',
+                image: 'images/toddler/side/4.jpg',
+                age: '12개월+',
+                time: '25분',
+                difficulty: '쉬움',
+                tip: '달걀을 못 먹는 아이라면 빼고 만들어도 맛있어요. 간장은 아이 월령에 맞게 조절해 주세요. 전분물로 걸쭉하게 만들면 아이가 흘리지 않고 먹기 편해요.',
+                ingredients: [
+                  { name: '순두부', amount: '200g' },
+                  { name: '팽이버섯', amount: '150g' },
+                  { name: '대파', amount: '10g' },
+                  { name: '양파', amount: '1/4개' },
+                  { name: '진간장', amount: '1큰술' },
+                  { name: '현미유', amount: '1큰술' },
+                  { name: '참기름', amount: '1큰술' },
+                  { name: '해물육수', amount: '500ml' },
+                  { name: '전분물', amount: '30ml' },
+                  { name: '달걀', amount: '1개 (선택)' },
+                ],
+                steps: [
+                  '해물육수를 미리 우려 준비한다.',
+                  '대파와 양파를 잘게 다진다.',
+                  '팽이버섯도 먹기 좋게 작게 자른다.',
+                  '순두부는 먹기 좋은 크기로 자른다.',
+                  '달걀을 곱게 풀어 준비한다.',
+                  '팬에 현미유를 두르고 대파, 양파를 볶는다.',
+                  '순두부를 넣고 으깨가며 함께 볶는다.',
+                  '해물육수, 팽이버섯, 간장을 넣고 끓인다.',
+                  '전분물을 넣어 원하는 걸쭉함이 될 때까지 저어가며 끓인다.',
+                  '달걀물을 넣고 저어가며 익힌다.',
+                  '불을 끄고 참기름을 넣어 마무리한다.',
+                ]
+              },
+              {
+                name: '게살카레',
+                emoji: '🦀',
+                image: 'images/toddler/side/3.jpg',
+                age: '18개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '카레가루는 20~30g 사이에서 아이 입맛에 맞게 조절해요. 우유를 넣으면 부드럽고 순한 맛이 나요.',
+                ingredients: [
+                  { name: '냉장 대게살', amount: '100g' },
+                  { name: '양파', amount: '1/2개' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '물', amount: '200ml' },
+                  { name: '우유', amount: '100ml' },
+                  { name: '카레가루', amount: '20~30g' },
+                  { name: '무염버터', amount: '15g' },
+                ],
+                steps: [
+                  '양파는 채 썬다.',
+                  '대게살은 체에 밭쳐 물기를 뺀다.',
+                  '달걀을 곱게 풀어 준비한다.',
+                  '팬에 무염버터를 녹이고 양파를 볶는다.',
+                  '게살을 추가해 함께 볶는다.',
+                  '물을 넣고 끓인다.',
+                  '끓기 시작하면 카레가루를 넣어 곱게 푼다.',
+                  '우유를 추가하고 한번 더 끓인다.',
+                  '달걀물을 붓고 5초 기다렸다가 천천히 섞어 마무리한다.',
+                ]
+              },
+              {
+                name: '목살 스테이크',
+                emoji: '🥩',
+                image: 'images/toddler/side/2.jpg',
+                age: '18개월+',
+                time: '20분',
+                difficulty: '보통',
+                tip: '목살 2덩이 기준이에요. 1T는 아빠 숟가락 기준이에요. 어른용은 양념장에 청양고추를 다져 넣으면 더 맛있어요!',
+                ingredients: [
+                  { name: '목살', amount: '2덩이' },
+                  { name: '감자전분', amount: '적당량' },
+                  { name: '올리브유', amount: '넉넉히' },
+                  { name: '간장', amount: '2큰술' },
+                  { name: '물', amount: '50ml' },
+                  { name: '다진마늘', amount: '1큰술' },
+                  { name: '굴소스', amount: '1/2큰술' },
+                  { name: '매실청', amount: '1/2큰술' },
+                  { name: '참기름', amount: '1큰술' },
+                  { name: '맛술', amount: '1큰술' },
+                  { name: '통깨', amount: '약간' },
+                ],
+                steps: [
+                  '목살에 칼집을 넣어 양념이 잘 배도록 준비한다.',
+                  '감자전분을 앞뒤로 골고루 묻혀준다.',
+                  '간장, 물, 다진마늘, 굴소스, 매실청, 참기름, 맛술, 통깨를 섞어 양념장을 만든다.',
+                  '팬에 올리브유를 넉넉히 두르고 목살을 올린다.',
+                  '자주 뒤집어주면서 완전히 익힌다.',
+                  '양념장을 붓고 원하는 농도가 될 때까지 조려 마무리한다.',
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      '간식': {
+        emoji: '🧁',
+        count: '14가지 레시피',
+        groups: [
+          {
+            icon: '🍌',
+            name: '과일·자연 간식',
+            sub: '가공 없는 건강한 단맛',
+            recipes: [
+              {
+                name: '야채듬뿍 아이스크림',
+                emoji: '🍦',
+                image: 'images/toddler/snack/11.jpg',
+                age: '12개월+',
+                time: '20분 + 냉동 3시간',
+                difficulty: '쉬움',
+                tip: '반드시 찐 당근을 사용하세요. 생당근은 풋내가 강하지만 찐 당근은 단맛이 올라와 아이 거부감이 확 줄어요. 꿀을 소량 넣으면 아이스크림 같은 만족도가 높아지지만 12개월 미만은 꿀 금지예요. 냉동 3~4일 내 섭취하고, 먹기 5분 전에 실온에 꺼내 두세요.',
+                ingredients: [
+                  { name: '귤', amount: '3개' },
+                  { name: '당근 (또는 토마토)', amount: '1개' },
+                  { name: '꿀', amount: '1~2작은술 (12개월+ / 기호에 따라 조절)' },
+                ],
+                steps: [
+                  '당근은 실리콘 찜기에 넣고 전자레인지 3~4분 쪄서 완전히 식혀 둔다.',
+                  '귤은 껍질을 벗겨 즙을 내거나 과육째 준비한다. (과육째 갈면 식이섬유가 더 유지됨)',
+                  '믹서에 찐 당근, 귤, 꿀을 넣고 곱게 갈아준다.',
+                  '용기에 담아 냉동실에 3시간 이상 얼린다.',
+                  '중간에 한 번 꺼내 저어주면 더 부드러운 질감이 나온다.',
+                  '먹기 5분 전 실온에 꺼내 두었다가 제공한다.',
+                ]
+              },
+              {
+                name: '찐고구마',
+                emoji: '🍠',
+                age: '12개월+',
+                time: '25분',
+                difficulty: '쉬움',
+                tip: '고구마는 설탕 없이도 충분히 달아요. 크기를 아이 한 입 크기로 잘라서 주세요.',
+                ingredients: [
+                  { name: '고구마', amount: '중간 크기 1/2개 (80g)' },
+                ],
+                steps: [
+                  '고구마를 깨끗이 씻어 껍질을 벗긴다.',
+                  '아이 한 입 크기로 자른다.',
+                  '찜기에 넣고 20분 정도 쪄서 부드럽게 익힌다.',
+                  '젓가락으로 찔러 쉽게 들어가면 완성.',
+                  '적당히 식혀서 제공한다.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🥞',
+            name: '구운 간식',
+            sub: '홈메이드 건강 간식',
+            recipes: [
+              {
+                name: '두부 프렌치토스트',
+                emoji: '🍞',
+                image: 'images/toddler/snack/9.jpg',
+                age: '12개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '밀가루 없이 두부로 만드는 건강 프렌치토스트예요. 전자레인지로 빵 반죽을 만든 뒤 팬에 구우면 겉은 바삭, 속은 부드러워요. 꿀, 견과류, 과일을 올리면 더욱 풍성해요.',
+                ingredients: [
+                  { name: '찌개두부', amount: '100g' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '알룰로스', amount: '1큰술' },
+                  { name: '전분', amount: '2큰술' },
+                  { name: '버터', amount: '약간' },
+                  { name: '꿀·견과류·과일', amount: '적당량 (토핑용)' },
+                ],
+                steps: [
+                  '찌개두부 100g을 포크로 곱게 으깬다.',
+                  '달걀 1개, 알룰로스, 전분을 넣고 잘 섞는다.',
+                  '용기에 반죽을 담고 랩을 씌워 전자레인지에 3분 돌린다.',
+                  '꺼낸 반죽을 버터 두른 팬에 올려 앞뒤로 노릇하게 굽는다.',
+                  '꿀, 견과류, 과일을 올리면 완성.',
+                ]
+              },
+              {
+                name: '요거트쌀찐빵',
+                emoji: '🍞',
+                image: 'images/toddler/snack/8.jpg',
+                age: '12개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                tip: '우유랑 과일과 함께 먹으면 든든한 간식으로 최고예요! 구황작물은 단호박, 고구마, 감자, 당근 등 집에 있는 것 다양하게 활용해 보세요.',
+                ingredients: [
+                  { name: '그릭요거트 또는 플레인요거트', amount: '80g' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '쌀가루', amount: '40g' },
+                  { name: '구황작물 (단호박·고구마·감자·당근 등)', amount: '50g' },
+                ],
+                steps: [
+                  '구황작물을 찜기에 쪄서 부드럽게 준비한다.',
+                  '요거트, 달걀, 쌀가루를 넣고 잘 섞는다.',
+                  '찐 구황작물 50g을 넣고 함께 섞는다.',
+                  '전자레인지용 찜기에 반죽을 담는다.',
+                  '전자레인지에 3분 30초 돌리면 완성.',
+                ]
+              },
+              {
+                name: '단호박호떡',
+                emoji: '🎑',
+                image: 'images/toddler/snack/6.jpg',
+                age: '12개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '전분가루는 반죽 상태에 따라 조절해요. 중약불로 굽지 않으면 겉만 타고 속은 익지 않을 수 있어요. 껍질은 취향껏 벗겨서 사용하세요.',
+                ingredients: [
+                  { name: '단호박', amount: '110g' },
+                  { name: '전분가루', amount: '1큰술 (듬뿍)' },
+                  { name: '아기치즈', amount: '1장' },
+                  { name: '현미유', amount: '약간' },
+                ],
+                steps: [
+                  '단호박을 찜기에 쪄서 부드럽게 익힌다.',
+                  '찐 단호박을 으깬다. (껍질은 취향에 따라 벗겨서 사용)',
+                  '전분가루를 듬뿍 넣고 잘 섞어 반죽을 만든다. (반죽 상태에 따라 추가 조절)',
+                  '아기치즈를 넣고 동글납작한 모양으로 빚는다.',
+                  '달군 팬에 현미유를 두르고 중약불에서 앞뒤로 노릇하게 굽는다.',
+                  '완전히 익혔는지 확인하고 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '바나나팬케이크',
+                emoji: '🍌',
+                age: '12개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                tip: '달걀과 바나나만으로 만드는 초간단 팬케이크예요. 밀가루 없이도 만들 수 있어요.',
+                ingredients: [
+                  { name: '바나나 (잘 익은 것)', amount: '1개' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '쌀가루 (선택)', amount: '1큰술' },
+                ],
+                steps: [
+                  '바나나를 포크로 곱게 으깬다.',
+                  '달걀을 풀어 으깬 바나나와 잘 섞는다.',
+                  '더 도톰하게 만들려면 쌀가루를 넣고 섞는다.',
+                  '달군 팬에 기름 없이 (혹은 최소량) 반죽을 동그랗게 붓는다.',
+                  '약불에서 앞뒤 2분씩 굽는다.',
+                  '완전히 익혔는지 확인하고 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '애호박전',
+                emoji: '🥒',
+                age: '15개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '애호박전은 씹기 연습에 좋아요. 소금을 최소화하고, 달걀은 완전히 익혀주세요.',
+                ingredients: [
+                  { name: '애호박', amount: '1/3개' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '쌀가루 또는 밀가루', amount: '2큰술' },
+                  { name: '들기름 또는 식용유', amount: '1/2작은술' },
+                ],
+                steps: [
+                  '애호박을 0.5cm 두께로 둥글게 썬다.',
+                  '달걀을 풀어 달걀물을 만든다.',
+                  '애호박에 가루를 얇게 묻히고, 달걀물을 입힌다.',
+                  '달군 팬에 기름을 두르고 중약불에서 앞뒤 2분씩 굽는다.',
+                  '달걀이 완전히 익으면 완성. 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '고구마치즈볼',
+                emoji: '🧀',
+                age: '18개월+',
+                time: '30분',
+                difficulty: '보통',
+                tip: '치즈는 나트륨 함량이 있으니 아기치즈 또는 저염 제품을 사용해요.',
+                ingredients: [
+                  { name: '고구마 (삶은 것)', amount: '100g' },
+                  { name: '아기치즈', amount: '1장' },
+                  { name: '쌀가루', amount: '2큰술' },
+                ],
+                steps: [
+                  '고구마를 쪄서 부드럽게 으깬다.',
+                  '아기치즈를 작은 조각으로 자른다.',
+                  '으깬 고구마에 쌀가루를 넣고 반죽한다.',
+                  '반죽을 조금 떼어 납작하게 만들고 가운데 치즈를 넣어 볼 모양으로 빚는다.',
+                  '에어프라이어 170도에서 10분 또는 오븐 180도에서 15분 굽는다.',
+                  '완전히 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '소고기 단호박 머핀',
+                emoji: '🧁',
+                image: 'images/dan.jpg',
+                age: '12개월+',
+                time: '25분',
+                difficulty: '쉬움',
+                tip: '초퍼로 너무 곱게 갈면 식감이 없어요. 아이 월령에 맞게 입자를 조절해주세요.',
+                ingredients: [
+                  { name: '단호박 (손질 후)', amount: '70g' },
+                  { name: '소고기 다짐육', amount: '80g' },
+                  { name: '계란', amount: '1개' },
+                  { name: '쌀가루', amount: '15g' },
+                ],
+                steps: [
+                  '단호박은 찜기에 쪄서 부드럽게 준비한다.',
+                  '초퍼에 찐 단호박, 소고기, 계란, 쌀가루를 모두 넣는다.',
+                  '아이 월령에 맞게 입자를 조절하며 초퍼를 돌린다.',
+                  '머핀틀에 반죽을 고르게 나눠 담는다.',
+                  '에어프라이어 160도에서 13분 구워주면 완성.',
+                  '완전히 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '바나나 크레페롤',
+                emoji: '🥞',
+                image: 'images/banana.jpg',
+                age: '12개월+',
+                time: '20분',
+                difficulty: '보통',
+                tip: '잘 익은 바나나일수록 달콤해요. 딸기·블루베리·망고 등 좋아하는 과일로 대체 가능해요. 노오븐·노설탕·노계란도 가능해요!',
+                ingredients: [
+                  { name: '핫케이크가루 (또는 아몬드/쌀/오트밀가루)', amount: '2큰술' },
+                  { name: '우유', amount: '4큰술' },
+                  { name: '달걀', amount: '1개' },
+                  { name: '그릭요거트', amount: '2큰술' },
+                  { name: '알룰로스 (또는 배즙)', amount: '0.5큰술' },
+                  { name: '바나나', amount: '1/3개' },
+                ],
+                steps: [
+                  '핫케이크가루 2T + 우유 4T + 달걀 1개를 넣고 잘 섞어 반죽을 만든다.',
+                  '달군 후라이팬에 반죽을 얇게 펴서 약불로 굽는다. (2장)',
+                  '크레페를 식히는 동안 그릭요거트 2T + 알룰로스 0.5T를 섞어 요거트 크림을 만든다.',
+                  '크레페 2장을 겹쳐 놓고 크림을 고르게 바른다.',
+                  '바나나를 올리고 돌돌 말아준다.',
+                  '전분가루를 살짝 뿌리면 완성.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '⚡',
+            name: '전자레인지·에어프라이어',
+            sub: '5분 뚝딱 초간단 간식',
+            recipes: [
+              {
+                name: '계란감자빵',
+                emoji: '🥔',
+                image: 'images/dan0.jpg',
+                age: '12개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                tip: '야채 종류는 매번 바꿔서 만들어도 좋아요. 냉장고 속 야채 큐브 활용하기 딱 좋은 레시피예요.',
+                ingredients: [
+                  { name: '찐감자', amount: '50g' },
+                  { name: '야채 큐브 (근대+양배추 등)', amount: '30g' },
+                  { name: '계란', amount: '1개' },
+                  { name: '오트밀', amount: '10g' },
+                ],
+                steps: [
+                  '전자레인지 찜기에 찐감자, 야채 큐브, 계란, 오트밀을 모두 넣는다.',
+                  '전자레인지 3분 30초 돌리면 완성.',
+                  '꺼낸 후 한 김 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '단호박빵',
+                emoji: '🎃',
+                image: 'images/dan1.jpg',
+                age: '7개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                tip: '계란 알레르기가 있는 아기는 노른자를 생략하고 분유 또는 우유 10ml로 대체해요.',
+                ingredients: [
+                  { name: '찐 단호박', amount: '140g' },
+                  { name: '계란 노른자', amount: '1개' },
+                  { name: '알룰로스 (또는 배즙 10ml)', amount: '0.5큰술' },
+                ],
+                steps: [
+                  '찐 단호박 140g에 노른자 1개, 알룰로스 0.5T를 넣고 으깨가며 잘 섞는다.',
+                  '머핀틀에 반죽을 담고 탕탕 내리쳐 기포를 제거한다.',
+                  '전자레인지 700W 3분 / 에어프라이어 160도 10~12분 / 오븐 170도 예열 후 12~15분 중 선택해서 익힌다.',
+                  '완전히 식혀서 제공한다.',
+                ]
+              },
+              {
+                name: '요거트 치즈 푸딩',
+                emoji: '🍮',
+                image: 'images/pooding.jpg',
+                age: '12개월+',
+                time: '5분',
+                difficulty: '쉬움',
+                tip: '전자레인지 후 냉장 숙성하면 더 꾸덕하고 맛있어요. 계란 알레르기가 있으면 옥수수전분 1T + 우유 30ml로 대체해요.',
+                ingredients: [
+                  { name: '달걀', amount: '1개' },
+                  { name: '그릭요거트', amount: '4큰술' },
+                  { name: '알룰로스 (또는 퓨레 20g)', amount: '3큰술' },
+                ],
+                steps: [
+                  '컵에 달걀 1개를 넣고 포크로 곱게 풀어준다.',
+                  '그릭요거트 4T + 알룰로스 3T를 넣고 잘 섞는다.',
+                  '전자레인지 1분 30초 돌리면 완성.',
+                  '그대로 먹어도 맛있고, 냉장고에 넣어 숙성하면 더 꾸덕해져요.',
+                ]
+              }
+            ]
+          },
+          {
+            icon: '🥩',
+            name: '찜·고기 간식',
+            sub: '든든한 단백질 간식',
+            recipes: [
+              {
+                name: '초간단 수육',
+                emoji: '🐷',
+                image: 'images/pig.jpg',
+                age: '18개월+',
+                time: '35분',
+                difficulty: '쉬움',
+                tip: '통삼겹 대신 구이용 삼겹살을 사면 자르는 수고를 덜 수 있어요. 대파·양파·마늘이 잡내를 잡아줘 월계수잎이나 맛술은 생략해도 괜찮아요!',
+                ingredients: [
+                  { name: '삼겹살 (구이용)', amount: '400g' },
+                  { name: '물', amount: '500ml' },
+                  { name: '맛술', amount: '3큰술' },
+                  { name: '간장', amount: '3큰술' },
+                  { name: '통마늘', amount: '2개' },
+                  { name: '대파', amount: '2뿌리' },
+                  { name: '양파', amount: '1개' },
+                  { name: '월계수잎', amount: '3장 (생략 가능)' },
+                  { name: '대추', amount: '3개 (생략 가능)' },
+                  { name: '생강가루', amount: '1/2큰술' },
+                ],
+                steps: [
+                  '냄비에 물 500ml, 맛술, 간장, 월계수잎, 대추, 생강가루를 넣는다.',
+                  '찜기를 올리고 양파를 슬라이스해서 바닥에 깔아준다.',
+                  '삼겹살을 올리고 대파, 통마늘도 함께 올린다.',
+                  '뚜껑을 덮고 중불로 25~30분 쪄준다.',
+                  '꼬치로 찔러보아 핏물이 나오지 않으면 완성.',
+                  '먹기 좋은 크기로 썰어 아기쌈장 또는 참소스에 찍어 제공한다.',
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  },
+
+  '성인레시피': {
+    emoji: '🍽️',
+    color: 'adult',
+    subs: {
+      '요리': {
+        emoji: '🥘',
+        count: '0가지 레시피',
+        groups: []
+      },
+      '식사': {
+        emoji: '🍜',
+        count: '0가지 레시피',
+        groups: []
+      },
+      '찌개': {
+        emoji: '🍲',
+        count: '1가지 레시피',
+        groups: [
+          {
+            icon: '🥩',
+            name: '고기 찌개',
+            sub: '든든한 고기 베이스 찌개',
+            recipes: [
+              {
+                name: '차돌 된장찌개',
+                emoji: '🍲',
+                image: 'images/chadol.jpg',
+                age: '성인',
+                time: '20분',
+                difficulty: '쉬움',
+                tip: '차돌을 먼저 볶아 기름을 낸 뒤 된장·고추장을 함께 볶아야 구수한 맛이 살아요. 기름이 올라올 때까지 충분히 볶는 게 포인트!',
+                ingredients: [
+                  { name: '차돌박이', amount: '적당량' },
+                  { name: '다진마늘', amount: '1큰술' },
+                  { name: '된장', amount: '2큰술' },
+                  { name: '고추장', amount: '1큰술' },
+                  { name: '고춧가루', amount: '2큰술' },
+                  { name: '물', amount: '500ml' },
+                  { name: '굴소스', amount: '1큰술' },
+                  { name: '참치액', amount: '1큰술' },
+                  { name: '양파', amount: '1/2개' },
+                  { name: '애호박', amount: '1/3개' },
+                  { name: '대파', amount: '1/2대' },
+                  { name: '두부', amount: '1/2모' },
+                ],
+                steps: [
+                  '냄비에 차돌박이를 넣고 볶는다.',
+                  '차돌에서 기름이 나오면 다진마늘 1T, 된장 2T, 고추장 1T를 넣고 기름이 올라올 때까지 충분히 볶는다.',
+                  '고춧가루 2T를 넣고 한 번 더 볶아준다.',
+                  '물 500ml를 붓고 굴소스 1T, 참치액 1T를 넣는다.',
+                  '양파, 애호박, 대파를 넣고 끓인다.',
+                  '끓어오르면 두부를 넣고 한소끔 더 끓이면 완성.',
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      '디저트': {
+        emoji: '🧁',
+        count: '0가지 레시피',
+        groups: []
+      },
+      '음료': {
+        emoji: '☕',
+        count: '1가지 레시피',
+        groups: [
+          {
+            icon: '☕',
+            name: '커피',
+            sub: '카페 스타일 홈카페',
+            recipes: [
+              {
+                name: '호텔 크림커피',
+                emoji: '☕',
+                image: 'images/c-coffee.jpg',
+                age: '성인',
+                time: '5분',
+                difficulty: '쉬움',
+                tip: '우유를 충분히 흔들어 거품을 많이 내야 크림커피 특유의 부드러운 층이 생겨요. 얼음을 먼저 넣고 우유를 부으면 층이 예쁘게 분리돼요.',
+                ingredients: [
+                  { name: '믹스커피', amount: '1봉' },
+                  { name: '카누 (인스턴트 에스프레소)', amount: '1봉' },
+                  { name: '물', amount: '30ml' },
+                  { name: '우유', amount: '소주잔 2개 분량' },
+                  { name: '얼음', amount: '2~3개' },
+                  { name: '설탕', amount: '티스푼 2스푼' },
+                ],
+                steps: [
+                  '믹스커피 1봉 + 카누 1봉을 물 30ml에 잘 녹여 커피 베이스를 만든다.',
+                  '뚜껑 있는 컵이나 셰이커에 우유(소주잔 2개) + 얼음 2~3개 + 설탕 2스푼을 넣는다.',
+                  '거품이 풍성하게 날 때까지 힘차게 흔든다.',
+                  '잔에 커피 베이스를 먼저 붓는다.',
+                  '흔든 우유를 천천히 위에 부어 층을 만든다.',
+                  '기호에 따라 얼음을 더 추가해도 좋다.',
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    }
+  }
+}
+
+// ─────────────────────────────────────────
+//  상태 & 네비게이션
+// ─────────────────────────────────────────
+let state = { category: null, sub: null, recipe: null }
+let history = []
+
+// ─────────────────────────────────────────
+//  PWA 설치
+// ─────────────────────────────────────────
+let deferredPrompt = null
+const installBtn = document.getElementById('install-btn')
+const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent)
+const isInStandalone = window.matchMedia('(display-mode: standalone)').matches
+
+if (!isInStandalone) {
+  if (isIOS) {
+    installBtn.classList.remove('hidden')
+  } else {
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault()
+      deferredPrompt = e
+      installBtn.classList.remove('hidden')
+    })
+  }
+}
+
+window.addEventListener('appinstalled', () => {
+  installBtn.classList.add('hidden')
+  deferredPrompt = null
+})
+
+function handleInstall() {
+  if (isIOS) {
+    document.getElementById('ios-modal').classList.add('open')
+  } else if (deferredPrompt) {
+    deferredPrompt.prompt()
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null })
+  }
+}
+
+function closeIosModal(e) {
+  if (e.target === document.getElementById('ios-modal')) {
+    document.getElementById('ios-modal').classList.remove('open')
+  }
+}
+
+function navigate(pageId, newState = {}) {
+  history.push(document.querySelector('.page.active')?.id)
+  state = { ...state, ...newState }
+  showPage(pageId)
+  updateHeader()
+}
+
+function goBack() {
+  const prev = history.pop()
+  if (prev) {
+    if (prev === 'page-home') state = { category: null, sub: null, recipe: null }
+    else if (prev === 'page-sub') state = { ...state, sub: null, recipe: null }
+    else if (prev === 'page-list') state = { ...state, recipe: null }
+    showPage(prev)
+    updateHeader()
+  }
+}
+
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+}
+
+function updateHeader() {
+  const backBtn = document.getElementById('back-btn')
+  const title = document.getElementById('header-title')
+  const bc = document.getElementById('breadcrumb')
+  const isHome = !state.category
+
+  backBtn.classList.toggle('visible', !isHome)
+
+  if (!state.category) {
+    title.textContent = '🍼 현,해린 이유식·유아식'
+    bc.textContent = ''
+  } else if (!state.sub) {
+    const d = DATA[state.category]
+    title.textContent = `${d.emoji} ${state.category}`
+    bc.textContent = ''
+  } else if (!state.recipe) {
+    const sub = DATA[state.category].subs[state.sub]
+    title.textContent = `${sub.emoji} ${state.sub}`
+    bc.textContent = state.category
+  } else {
+    title.textContent = state.recipe.name
+    bc.textContent = `${state.category} > ${state.sub}`
+  }
+}
+
+// ─────────────────────────────────────────
+//  렌더링
+// ─────────────────────────────────────────
+function selectCategory(cat) {
+  const d = DATA[cat]
+  const subs = Object.entries(d.subs)
+  const colorClass = d.color
+
+  const html = `
+    <div class="section-label">${cat} 소카테고리</div>
+    <div class="sub-grid">
+      ${subs.map(([name, sub]) => `
+        <button class="sub-card" onclick="selectSub('${name}')">
+          <div class="sub-emoji">${sub.emoji}</div>
+          <div class="sub-name">${name}</div>
+          <div class="sub-count">${sub.count}</div>
+        </button>
+      `).join('')}
+    </div>
+  `
+  document.getElementById('page-sub').innerHTML = html
+  navigate('page-sub', { category: cat })
+}
+
+function selectSub(sub) {
+  const d = DATA[state.category]
+  const subData = d.subs[sub]
+  const colorClass = d.color
+  const groupClass = colorClass + '-group'
+
+  const html = subData.groups.map((g, gi) => `
+    <div class="group-section">
+      <div class="group-header ${groupClass}" onclick="toggleGroup(${gi})">
+        <div class="group-icon">${g.icon}</div>
+        <div class="group-info">
+          <div class="group-name">${g.name}</div>
+          <div class="group-sub">${g.sub}</div>
+        </div>
+        <div class="group-chevron" id="chevron-${gi}">▶</div>
+      </div>
+      <div class="recipe-list" id="group-${gi}">
+        ${g.recipes.map((r, ri) => `
+          <div class="recipe-item" onclick="selectRecipe(${gi}, ${ri})">
+            <div style="font-size:28px">${r.emoji}</div>
+            <div class="recipe-item-info">
+              <div class="recipe-item-name">${r.name}</div>
+              <div class="recipe-item-meta">${g.sub}</div>
+              <div class="recipe-item-badges">
+                <span class="badge badge-age-${colorClass}">${r.age}</span>
+                <span class="badge badge-time">⏱ ${r.time}</span>
+                <span class="badge badge-time">${r.difficulty}</span>
+              </div>
+            </div>
+            <div class="recipe-arrow">›</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('')
+
+  document.getElementById('page-list').innerHTML = html
+  navigate('page-list', { sub })
+}
+
+function toggleGroup(idx) {
+  const list = document.getElementById(`group-${idx}`)
+  const chevron = document.getElementById(`chevron-${idx}`)
+  list.classList.toggle('open')
+  chevron.classList.toggle('open')
+}
+
+function selectRecipe(gi, ri) {
+  const d = DATA[state.category]
+  const subData = d.subs[state.sub]
+  const recipe = subData.groups[gi].recipes[ri]
+  const colorClass = d.color
+
+  const html = `
+    <div class="recipe-hero ${colorClass}-hero">
+      ${recipe.image
+        ? `<img class="recipe-hero-img" src="${recipe.image}" alt="${recipe.name}">`
+        : `<div class="recipe-hero-emoji">${recipe.emoji}</div>`
+      }
+      <div class="recipe-hero-name">${recipe.name}</div>
+      <div class="recipe-hero-badges">
+        <span class="recipe-hero-badge">👶 ${recipe.age}</span>
+        <span class="recipe-hero-badge">⏱ ${recipe.time}</span>
+        <span class="recipe-hero-badge">🔥 ${recipe.difficulty}</span>
+      </div>
+    </div>
+
+    <div class="tip-box ${colorClass}-tip">
+      <div class="tip-title">💡 이런 레시피예요</div>
+      <div class="tip-text">${recipe.tip}</div>
+    </div>
+
+    <div class="recipe-section">
+      <div class="recipe-section-title">🛒 재료</div>
+      <div class="ingredient-grid">
+        ${recipe.ingredients.map(i => `
+          <div class="ingredient-item">
+            <div class="ing-name">${i.name}</div>
+            <div class="ing-amount">${i.amount}</div>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <div class="recipe-section">
+      <div class="recipe-section-title">👩‍🍳 만드는 순서</div>
+      ${recipe.steps.map((s, i) => `
+        <div class="step-item">
+          <div class="step-num ${colorClass}-num">${i + 1}</div>
+          <div class="step-text">${s}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="note-box">
+      ⚠️ <b>주의사항</b><br>
+      모든 음식은 처음 먹일 때 소량씩 시작하여 3~5일 간격으로 알레르기 반응을 확인하세요.
+      아이의 개인차가 있으니 의사·영양사 상담을 권장합니다.
+    </div>
+  `
+
+  document.getElementById('page-recipe').innerHTML = html
+  navigate('page-recipe', { recipe })
+
+  // 페이지 상단으로 스크롤
+  document.getElementById('main').scrollTop = 0
+  window.scrollTo(0, 0)
+}
+</script>
+</body>
+</html>
