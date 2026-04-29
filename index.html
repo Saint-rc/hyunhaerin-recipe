@@ -154,6 +154,15 @@
     .tip-box.adult-tip { background: #EDE0FF; border-color: #9B6FD4; }
     .badge-time { background: #F3F3F3; color: #666; }
     .recipe-arrow { font-size: 14px; color: #CCC; }
+    .recipe-thumb {
+      width: 56px; height: 56px; border-radius: 10px;
+      object-fit: cover; flex-shrink: 0;
+    }
+    .recipe-thumb-emoji {
+      width: 56px; height: 56px; border-radius: 10px;
+      background: #F5F5F5; display: flex; align-items: center;
+      justify-content: center; font-size: 28px; flex-shrink: 0;
+    }
 
     /* ── Recipe Detail Page ── */
     .recipe-hero {
@@ -2113,7 +2122,9 @@ function selectSub(sub) {
     html = `<div style="display:flex;flex-direction:column;gap:8px;padding:4px 0">` +
       g.recipes.map((r, ri) => `
         <div class="recipe-item" onclick="selectRecipe(0, ${ri})">
-          <div style="font-size:28px">${r.emoji}</div>
+          ${r.image
+            ? `<img class="recipe-thumb" src="${r.image}" alt="${r.name}" loading="lazy">`
+            : `<div class="recipe-thumb-emoji">${r.emoji}</div>`}
           <div class="recipe-item-info">
             <div class="recipe-item-name">${r.name}</div>
             <div class="recipe-item-badges">
@@ -2140,7 +2151,9 @@ function selectSub(sub) {
         <div class="recipe-list" id="group-${gi}">
           ${g.recipes.map((r, ri) => `
             <div class="recipe-item" onclick="selectRecipe(${gi}, ${ri})">
-              <div style="font-size:28px">${r.emoji}</div>
+              ${r.image
+                ? `<img class="recipe-thumb" src="${r.image}" alt="${r.name}" loading="lazy">`
+                : `<div class="recipe-thumb-emoji">${r.emoji}</div>`}
               <div class="recipe-item-info">
                 <div class="recipe-item-name">${r.name}</div>
                 <div class="recipe-item-meta">${g.sub}</div>
