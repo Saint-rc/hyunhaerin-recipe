@@ -53,6 +53,13 @@
     #back-btn.visible { display: flex; }
     #header-title { font-size: 17px; font-weight: 700; flex: 1; }
     #breadcrumb { font-size: 12px; color: var(--muted); }
+    #refresh-btn {
+      width: 36px; height: 36px; border-radius: 50%; border: none;
+      background: transparent; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; flex-shrink: 0; transition: transform 0.4s ease;
+    }
+    #refresh-btn.spinning { transform: rotate(360deg); }
 
     /* ── Main ── */
     #main {
@@ -291,6 +298,7 @@
     <div id="header-title">🍼 현,해린 이유식·유아식</div>
     <div id="breadcrumb"></div>
   </div>
+  <button id="refresh-btn" onclick="hardRefresh()" title="새로고침">↻</button>
 </div>
 
 <!-- Main -->
@@ -1179,7 +1187,7 @@ const DATA = {
       },
       '반찬': {
         emoji: '🥗',
-        count: '8가지 레시피',
+        count: '9가지 레시피',
         groups: [
           {
             icon: '🥗',
@@ -1398,6 +1406,35 @@ const DATA = {
                   '중약불에서 눌러붙지 않게 중간중간 저어가며 양념이 졸아들 때까지 조린다.',
                   '양념이 적당히 졸면 불을 끄고 완성한다.',
                 ]
+              },
+              {
+                name: '초간단 수육',
+                emoji: '🐷',
+                image: 'images/pig.jpg',
+                age: '18개월+',
+                time: '35분',
+                difficulty: '쉬움',
+                tip: '통삼겹 대신 구이용 삼겹살을 사면 자르는 수고를 덜 수 있어요. 대파·양파·마늘이 잡내를 잡아줘 월계수잎이나 맛술은 생략해도 괜찮아요!',
+                ingredients: [
+                  { name: '삼겹살 (구이용)', amount: '400g' },
+                  { name: '물', amount: '500ml' },
+                  { name: '맛술', amount: '3큰술' },
+                  { name: '간장', amount: '3큰술' },
+                  { name: '통마늘', amount: '2개' },
+                  { name: '대파', amount: '2뿌리' },
+                  { name: '양파', amount: '1개' },
+                  { name: '월계수잎', amount: '3장 (생략 가능)' },
+                  { name: '대추', amount: '3개 (생략 가능)' },
+                  { name: '생강가루', amount: '1/2큰술' },
+                ],
+                steps: [
+                  '냄비에 물 500ml, 맛술, 간장, 월계수잎, 대추, 생강가루를 넣는다.',
+                  '찜기를 올리고 양파를 슬라이스해서 바닥에 깔아준다.',
+                  '삼겹살을 올리고 대파, 통마늘도 함께 올린다.',
+                  '뚜껑을 덮고 중불로 25~30분 쪄준다.',
+                  '꼬치로 찔러보아 핏물이 나오지 않으면 완성.',
+                  '먹기 좋은 크기로 썰어 아기쌈장 또는 참소스에 찍어 제공한다.',
+                ]
               }
             ]
           }
@@ -1405,7 +1442,7 @@ const DATA = {
       },
       '간식': {
         emoji: '🧁',
-        count: '10가지 레시피',
+        count: '9가지 레시피',
         groups: [
           {
             icon: '🧁',
@@ -1609,35 +1646,6 @@ const DATA = {
                   '그릭요거트 4T + 알룰로스 3T를 넣고 잘 섞는다.',
                   '전자레인지 1분 30초 돌리면 완성.',
                   '그대로 먹어도 맛있고, 냉장고에 넣어 숙성하면 더 꾸덕해져요.',
-                ]
-              },
-              {
-                name: '초간단 수육',
-                emoji: '🐷',
-                image: 'images/pig.jpg',
-                age: '18개월+',
-                time: '35분',
-                difficulty: '쉬움',
-                tip: '통삼겹 대신 구이용 삼겹살을 사면 자르는 수고를 덜 수 있어요. 대파·양파·마늘이 잡내를 잡아줘 월계수잎이나 맛술은 생략해도 괜찮아요!',
-                ingredients: [
-                  { name: '삼겹살 (구이용)', amount: '400g' },
-                  { name: '물', amount: '500ml' },
-                  { name: '맛술', amount: '3큰술' },
-                  { name: '간장', amount: '3큰술' },
-                  { name: '통마늘', amount: '2개' },
-                  { name: '대파', amount: '2뿌리' },
-                  { name: '양파', amount: '1개' },
-                  { name: '월계수잎', amount: '3장 (생략 가능)' },
-                  { name: '대추', amount: '3개 (생략 가능)' },
-                  { name: '생강가루', amount: '1/2큰술' },
-                ],
-                steps: [
-                  '냄비에 물 500ml, 맛술, 간장, 월계수잎, 대추, 생강가루를 넣는다.',
-                  '찜기를 올리고 양파를 슬라이스해서 바닥에 깔아준다.',
-                  '삼겹살을 올리고 대파, 통마늘도 함께 올린다.',
-                  '뚜껑을 덮고 중불로 25~30분 쪄준다.',
-                  '꼬치로 찔러보아 핏물이 나오지 않으면 완성.',
-                  '먹기 좋은 크기로 썰어 아기쌈장 또는 참소스에 찍어 제공한다.',
                 ]
               }
             ]
@@ -2003,6 +2011,26 @@ function selectRecipe(gi, ri) {
   // 페이지 상단으로 스크롤
   document.getElementById('main').scrollTop = 0
   window.scrollTo(0, 0)
+}
+
+// ── 강제 새로고침 (Service Worker 캐시 포함) ──
+async function hardRefresh() {
+  const btn = document.getElementById('refresh-btn')
+  btn.classList.add('spinning')
+  try {
+    // Service Worker 캐시 전체 삭제
+    if ('caches' in window) {
+      const keys = await caches.keys()
+      await Promise.all(keys.map(k => caches.delete(k)))
+    }
+    // Service Worker 강제 업데이트
+    if ('serviceWorker' in navigator) {
+      const regs = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(regs.map(r => r.update()))
+    }
+  } catch(e) { /* 무시 */ }
+  // 약간의 딜레이 후 강제 리로드
+  setTimeout(() => location.reload(true), 300)
 }
 </script>
 </body>
