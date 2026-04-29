@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>레시피 등록 — 내맘대로레시피</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --primary: #FF8264;
+      --primary-light: #FFF0EC;
+      --bg: #FFF8F3;
+      --text: #2D2D2D;
+      --text-light: #888;
+      --border: #E8E0DA;
+      --radius: 14px;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans KR', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      padding: 0 0 60px;
+    }
+    /* Header */
+    .header {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    .header a { text-decoration: none; color: var(--primary); font-size: 20px; }
+    .header-title { font-size: 17px; font-weight: 700; color: var(--text); }
+    .header-sub { font-size: 12px; color: var(--text-light); }
+
+    /* Progress */
+    .progress-bar {
+      height: 3px;
+      background: var(--border);
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+
+    /* Container */
+    .container { max-width: 480px; margin: 0 auto; padding: 0 20px; }
+
+    /* Step card */
+    .step {
+      display: none;
+      animation: fadeIn 0.2s ease;
+    }
+    .step.active { display: block; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .step-title {
+      font-size: 22px;
+      font-weight: 800;
+      margin: 28px 0 6px;
+      line-height: 1.3;
+    }
+    .step-desc {
+      font-size: 14px;
+      color: var(--text-light);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    /* Form elements */
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 7px;
+    }
+    input[type="text"],
+    input[type="password"],
+    textarea,
+    select {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 13px 15px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      background: white;
+      outline: none;
+      transition: border-color 0.2s;
+      -webkit-appearance: none;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--primary);
+    }
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.6;
+    }
+    .form-group { margin-bottom: 18px; }
+
+    /* Category grid */
+    .cat-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .cat-btn {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 8px;
+      text-align: center;
+      cursor: pointer;
+      background: white;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cat-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .cat-btn .cat-emoji { font-size: 28px; display: block; margin-bottom: 6px; }
+    .cat-btn .cat-name { font-size: 13px; font-weight: 700; color: var(--text); }
+
+    .sub-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+    .sub-btn {
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 12px;
+      text-align: center;
+      cursor: pointer;
+      background: white;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .sub-btn.selected {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .sub-btn .sub-emoji { font-size: 22px; display: block; margin-bottom: 5px; }
+    .sub-btn .sub-name { font-size: 14px; font-weight: 700; }
+
+    /* Image upload */
+    .upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 32px 20px;
+      text-align: center;
+      cursor: pointer;
+      background: white;
+      transition: border-color 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+    .upload-area:hover, .upload-area.drag-over {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+    .upload-icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-text { font-size: 14px; color: var(--text-light); line-height: 1.5; }
+    .upload-text strong { color: var(--primary); }
+    .preview-img {
+      width: 100%;
+      max-height: 240px;
+      object-fit: cover;
+      border-radius: 10px;
+      margin-top: 12px;
+      display: none;
+    }
+    .upload-note {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    /* Password screen */
+    .lock-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80dvh;
+      text-align: center;
+      padding: 20px;
+    }
+    .lock-icon { font-size: 56px; margin-bottom: 20px; }
+    .lock-title { font-size: 24px; font-weight: 800; margin-bottom: 8px; }
+    .lock-desc { font-size: 14px; color: var(--text-light); margin-bottom: 32px; line-height: 1.6; }
+    .lock-input-wrap {
+      width: 100%;
+      max-width: 320px;
+      position: relative;
+    }
+    .lock-input-wrap input {
+      text-align: center;
+      font-size: 18px;
+      letter-spacing: 4px;
+      padding: 16px;
+    }
+    .pw-error {
+      color: #E53935;
+      font-size: 13px;
+      margin-top: 10px;
+      display: none;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: var(--radius);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+    .btn-primary:hover { background: #e6714f; }
+    .btn-primary:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+    }
+    .btn-outline {
+      background: white;
+      color: var(--primary);
+      border: 2px solid var(--primary);
+      margin-top: 10px;
+    }
+    .btn-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    .btn-row .btn { flex: 1; }
+    .btn-back {
+      background: white;
+      color: #666;
+      border: 1.5px solid var(--border);
+    }
+
+    /* Success */
+    .success-screen {
+      text-align: center;
+      padding: 40px 20px;
+    }
+    .success-icon { font-size: 64px; margin-bottom: 20px; }
+    .success-title { font-size: 24px; font-weight: 800; margin-bottom: 12px; }
+    .success-desc { font-size: 15px; color: var(--text-light); line-height: 1.8; }
+    .success-box {
+      background: var(--primary-light);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin: 24px 0;
+      text-align: left;
+    }
+    .success-box p { font-size: 13px; color: #555; line-height: 1.8; }
+
+    /* Step indicator */
+    .step-indicator {
+      font-size: 12px;
+      color: var(--text-light);
+      margin-bottom: 4px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* Recipe textarea hints */
+    .recipe-hint {
+      background: #f5f5f5;
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+    }
+    .recipe-hint h4 { font-size: 12px; font-weight: 700; color: #666; margin-bottom: 6px; }
+    .recipe-hint p { font-size: 12px; color: #888; line-height: 1.7; }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <a href="index.html">←</a>
+  <div>
+    <div class="header-title">레시피 등록</div>
+    <div class="header-sub">내맘대로레시피</div>
+  </div>
+</div>
+<div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+<!-- Lock Screen (Password) -->
+<div id="lockScreen">
+  <div class="lock-screen">
+    <div class="lock-icon">🔒</div>
+    <div class="lock-title">레시피 등록하기</div>
+    <div class="lock-desc">등록 비밀번호를 입력하세요.<br>비밀번호는 관리자에게 문의하세요.</div>
+    <div class="lock-input-wrap">
+      <input type="password" id="pwInput" placeholder="비밀번호" autocomplete="off" maxlength="20">
+      <div class="pw-error" id="pwError">비밀번호가 틀렸습니다.</div>
+    </div>
+    <br>
+    <div style="width:100%;max-width:320px">
+      <button class="btn btn-primary" onclick="checkPassword()">확인</button>
+    </div>
+  </div>
+</div>
+
+<!-- Main Form (hidden until password OK) -->
+<div id="mainForm" style="display:none">
+  <div class="container">
+
+    <!-- STEP 1: 등록자 이름 -->
+    <div class="step active" id="step1">
+      <div class="step-indicator">STEP 1 / 4</div>
+      <div class="step-title">이름을 알려주세요</div>
+      <div class="step-desc">등록해주신 분의 이름을 남겨주세요 😊</div>
+      <div class="form-group">
+        <label>이름 / 닉네임</label>
+        <input type="text" id="submitterName" placeholder="예: 지혜맘, 은주" maxlength="20">
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="goStep(2)">다음 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2: 카테고리 선택 -->
+    <div class="step" id="step2">
+      <div class="step-indicator">STEP 2 / 4</div>
+      <div class="step-title">카테고리를 선택하세요</div>
+      <div class="step-desc">어떤 종류의 레시피인가요?</div>
+
+      <div class="cat-grid">
+        <div class="cat-btn" onclick="selectCategory('이유식', this)">
+          <span class="cat-emoji">🍼</span>
+          <span class="cat-name">이유식</span>
+        </div>
+        <div class="cat-btn" onclick="selectCategory('유아식', this)">
+          <span class="cat-emoji">🥣</span>
+          <span class="cat-name">유아식</span>
+        </div>
+        <div class="cat-btn" onclick="selectCategory('성인레시피', this)">
+          <span class="cat-emoji">🍽️</span>
+          <span class="cat-name">성인레시피</span>
+        </div>
+      </div>
+
+      <!-- 소카테고리 -->
+      <div id="subCatWrap" style="display:none">
+        <label>소카테고리</label>
+        <div class="sub-grid" id="subCatGrid"></div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(1)">← 이전</button>
+        <button class="btn btn-primary" onclick="goStep(3)" id="stepBtn2" disabled>다음 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: 레시피 내용 -->
+    <div class="step" id="step3">
+      <div class="step-indicator">STEP 3 / 4</div>
+      <div class="step-title">레시피를 입력하세요</div>
+      <div class="step-desc">형식은 자유롭게! 아는 대로 적어주시면 됩니다.</div>
+
+      <div class="form-group">
+        <label>레시피 이름 *</label>
+        <input type="text" id="recipeName" placeholder="예: 소고기 야채죽, 단호박 찜" maxlength="50">
+      </div>
+
+      <div class="form-hint recipe-hint">
+        <h4>💡 어떻게 적으면 될까요?</h4>
+        <p>재료, 만드는 법을 자유롭게 적어주세요.<br>
+        정확하지 않아도 괜찮아요 — 관리자가 다듬어서 올립니다.<br>
+        조리 시간, 대상 연령, 팁이 있으면 함께 적어주세요!</p>
+      </div>
+
+      <div class="form-group">
+        <label>레시피 내용 *</label>
+        <textarea id="recipeText" rows="10"
+          placeholder="예)&#10;&#10;재료: 소고기 50g, 당근 20g, 양파 1/4개, 밥 80g&#10;&#10;만드는법:&#10;1. 소고기를 잘게 썰어요&#10;2. 채소를 작게 다져요&#10;3. 물 300ml에 모두 넣고 20분 끓여요&#10;&#10;대상: 12개월+&#10;시간: 30분&#10;팁: 소금 없이 재료 본연의 맛으로!"></textarea>
+      </div>
+
+      <div class="form-group">
+        <label>추가 메모 (선택)</label>
+        <input type="text" id="recipeNotes" placeholder="특별히 전달하고 싶은 내용" maxlength="100">
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(2)">← 이전</button>
+        <button class="btn btn-primary" onclick="goStep(4)">다음 →</button>
+      </div>
+    </div>
+
+    <!-- STEP 4: 사진 등록 -->
+    <div class="step" id="step4">
+      <div class="step-indicator">STEP 4 / 4</div>
+      <div class="step-title">사진을 올려주세요</div>
+      <div class="step-desc">완성된 음식 사진이 있으면 함께 올려주세요.<br>없어도 등록은 가능해요 😊</div>
+
+      <div class="upload-area" id="uploadArea"
+        ondragover="handleDragOver(event)"
+        ondragleave="handleDragLeave(event)"
+        ondrop="handleDrop(event)">
+        <input type="file" id="imageInput" accept="image/*" onchange="handleImageSelect(event)">
+        <div class="upload-icon">📸</div>
+        <div class="upload-text">
+          <strong>사진 선택</strong>하거나<br>여기에 끌어다 놓으세요<br>
+          <span style="font-size:12px">JPG, PNG, HEIC 가능</span>
+        </div>
+      </div>
+      <img id="previewImg" class="preview-img">
+      <div class="upload-note" id="uploadNote"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-back" onclick="goStep(3)">← 이전</button>
+        <button class="btn btn-primary" id="submitBtn" onclick="submitRecipe()">등록하기 🍴</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="step" id="stepSuccess">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">등록 완료!</div>
+        <div class="success-desc">
+          레시피가 성공적으로 접수되었어요.<br>
+          관리자 검토 후 앱에 올라갑니다!
+        </div>
+        <div class="success-box">
+          <p>📋 <b>등록자:</b> <span id="resultName"></span></p>
+          <p>📂 <b>카테고리:</b> <span id="resultCat"></span></p>
+          <p>🍽️ <b>레시피:</b> <span id="resultRecipe"></span></p>
+        </div>
+        <button class="btn btn-primary" onclick="resetForm()">다른 레시피 등록하기</button>
+        <button class="btn btn-outline" onclick="location.href='index.html'" style="margin-top:12px">앱으로 돌아가기</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // ─── 설정 ───────────────────────────────────────────
+  const SUPABASE_URL  = 'https://mqwuclxkwqhvpixicvgu.supabase.co'
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1xd3VjbHhrd3FodnBpeGljdmd1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3MDIzOTMsImV4cCI6MjA5MTI3ODM5M30.UZNQ1H8lkf0-DsGx5hId82AK7JwUnm1GIW8s8JOug_0'
+  const PASSWORD      = 'recipe1234'  // ← 나중에 원하는 비밀번호로 변경하세요
+
+  // 소카테고리 매핑
+  const SUB_CATS = {
+    '이유식':   [{ emoji:'🍚', name:'밥' }, { emoji:'🍪', name:'간식' }],
+    '유아식':   [{ emoji:'🍚', name:'밥' }, { emoji:'🥗', name:'반찬' }, { emoji:'🍪', name:'간식' }],
+    '성인레시피': [{ emoji:'🥘', name:'요리' }, { emoji:'🍜', name:'식사' }, { emoji:'🍲', name:'찌개' }],
+  }
+
+  // ─── 상태 ───────────────────────────────────────────
+  let currentStep = 1
+  let state = {
+    name: '', category: '', subCategory: '', recipeName: '', recipeText: '', notes: '', imageFile: null
+  }
+
+  // ─── 비밀번호 확인 ────────────────────────────────────
+  function checkPassword() {
+    const pw = document.getElementById('pwInput').value.trim()
+    if (pw === PASSWORD) {
+      document.getElementById('lockScreen').style.display = 'none'
+      document.getElementById('mainForm').style.display   = 'block'
+      updateProgress()
+    } else {
+      document.getElementById('pwError').style.display = 'block'
+      document.getElementById('pwInput').value = ''
+      document.getElementById('pwInput').focus()
+    }
+  }
+  document.getElementById('pwInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkPassword()
+  })
+
+  // ─── 진행도 업데이트 ──────────────────────────────────
+  function updateProgress() {
+    const steps = 4
+    const pct = ((currentStep - 1) / steps) * 100
+    document.getElementById('progressFill').style.width = pct + '%'
+  }
+
+  // ─── 스텝 이동 ────────────────────────────────────────
+  function goStep(n) {
+    // 유효성 검사
+    if (n > currentStep) {
+      if (currentStep === 3) {
+        if (!document.getElementById('recipeName').value.trim()) {
+          alert('레시피 이름을 입력해주세요.'); return
+        }
+        if (!document.getElementById('recipeText').value.trim()) {
+          alert('레시피 내용을 입력해주세요.'); return
+        }
+      }
+      if (currentStep === 2 && !state.subCategory) {
+        alert('소카테고리를 선택해주세요.'); return
+      }
+    }
+
+    document.getElementById('step' + currentStep).classList.remove('active')
+    currentStep = n
+    document.getElementById('step' + currentStep).classList.add('active')
+    updateProgress()
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+  }
+
+  // ─── 카테고리 선택 ────────────────────────────────────
+  function selectCategory(cat, el) {
+    // 이전 선택 해제
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'))
+    el.classList.add('selected')
+    state.category = cat
+    state.subCategory = ''
+
+    // 소카테고리 표시
+    const subs = SUB_CATS[cat]
+    const grid = document.getElementById('subCatGrid')
+    grid.innerHTML = subs.map(s =>
+      `<div class="sub-btn" onclick="selectSubCategory('${s.name}', this)">
+        <span class="sub-emoji">${s.emoji}</span>
+        <span class="sub-name">${s.name}</span>
+      </div>`
+    ).join('')
+    document.getElementById('subCatWrap').style.display = 'block'
+    document.getElementById('stepBtn2').disabled = true
+  }
+
+  function selectSubCategory(sub, el) {
+    document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('selected'))
+    el.classList.add('selected')
+    state.subCategory = sub
+    document.getElementById('stepBtn2').disabled = false
+  }
+
+  // ─── 이미지 처리 ──────────────────────────────────────
+  function handleImageSelect(e) {
+    const file = e.target.files[0]
+    if (file) showPreview(file)
+  }
+  function handleDragOver(e) {
+    e.preventDefault()
+    document.getElementById('uploadArea').classList.add('drag-over')
+  }
+  function handleDragLeave() {
+    document.getElementById('uploadArea').classList.remove('drag-over')
+  }
+  function handleDrop(e) {
+    e.preventDefault()
+    document.getElementById('uploadArea').classList.remove('drag-over')
+    const file = e.dataTransfer.files[0]
+    if (file && file.type.startsWith('image/')) showPreview(file)
+  }
+  function showPreview(file) {
+    state.imageFile = file
+    const reader = new FileReader()
+    reader.onload = ev => {
+      const img = document.getElementById('previewImg')
+      img.src = ev.target.result
+      img.style.display = 'block'
+    }
+    reader.readAsDataURL(file)
+    document.getElementById('uploadNote').textContent = '✅ ' + file.name
+  }
+
+  // ─── 제출 ─────────────────────────────────────────────
+  async function submitRecipe() {
+    const btn = document.getElementById('submitBtn')
+    btn.disabled = true
+    btn.innerHTML = '<span class="spinner"></span>등록 중...'
+
+    // 값 수집
+    state.name       = document.getElementById('submitterName').value.trim() || '익명'
+    state.recipeName = document.getElementById('recipeName').value.trim()
+    state.recipeText = document.getElementById('recipeText').value.trim()
+    state.notes      = document.getElementById('recipeNotes').value.trim()
+
+    let imagePath = null, imageUrl = null
+
+    try {
+      // 1) 이미지 업로드 (있으면)
+      if (state.imageFile) {
+        const ext      = state.imageFile.name.split('.').pop()
+        const fileName = `${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`
+        const filePath = `submissions/${fileName}`
+
+        const uploadRes = await fetch(
+          `${SUPABASE_URL}/storage/v1/object/recipe-images/${filePath}`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${SUPABASE_ANON}`,
+              'Content-Type': state.imageFile.type,
+            },
+            body: state.imageFile,
+          }
+        )
+        if (uploadRes.ok) {
+          imagePath = filePath
+          imageUrl  = `${SUPABASE_URL}/storage/v1/object/public/recipe-images/${filePath}`
+        }
+      }
+
+      // 2) DB에 레시피 저장
+      const row = {
+        status:         'pending',
+        submitter_name: state.name,
+        category:       state.category,
+        sub_category:   state.subCategory,
+        recipe_name:    state.recipeName,
+        recipe_text:    state.recipeText,
+        notes:          state.notes || null,
+        image_path:     imagePath,
+        image_url:      imageUrl,
+      }
+
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/recipe_submissions`, {
+        method:  'POST',
+        headers: {
+          'apikey':        SUPABASE_ANON,
+          'Authorization': `Bearer ${SUPABASE_ANON}`,
+          'Content-Type':  'application/json',
+          'Prefer':        'return=minimal',
+        },
+        body: JSON.stringify(row),
+      })
+
+      if (!res.ok) {
+        const err = await res.text()
+        throw new Error(err)
+      }
+
+      // 3) 성공 화면
+      document.getElementById('resultName').textContent   = state.name
+      document.getElementById('resultCat').textContent    = state.category + ' > ' + state.subCategory
+      document.getElementById('resultRecipe').textContent = state.recipeName
+
+      document.getElementById('step4').classList.remove('active')
+      document.getElementById('stepSuccess').classList.add('active')
+      document.getElementById('progressFill').style.width = '100%'
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+
+    } catch (e) {
+      console.error(e)
+      alert('등록 중 오류가 발생했습니다.\n' + e.message)
+      btn.disabled = false
+      btn.innerHTML = '등록하기 🍴'
+    }
+  }
+
+  // ─── 초기화 ───────────────────────────────────────────
+  function resetForm() {
+    state = { name:'', category:'', subCategory:'', recipeName:'', recipeText:'', notes:'', imageFile:null }
+    currentStep = 1
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'))
+    document.getElementById('step1').classList.add('active')
+    document.getElementById('progressFill').style.width = '0%'
+    document.getElementById('submitterName').value = ''
+    document.getElementById('recipeName').value    = ''
+    document.getElementById('recipeText').value    = ''
+    document.getElementById('recipeNotes').value   = ''
+    document.getElementById('previewImg').style.display = 'none'
+    document.getElementById('uploadNote').textContent  = ''
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('selected'))
+    document.getElementById('subCatWrap').style.display = 'none'
+    document.getElementById('submitBtn').disabled = false
+    document.getElementById('submitBtn').innerHTML = '등록하기 🍴'
+    window.scrollTo({ top: 0 })
+  }
+</script>
+
+</body>
+</html>
