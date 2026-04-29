@@ -1816,35 +1816,57 @@ function selectSub(sub) {
   const colorClass = d.color
   const groupClass = colorClass + '-group'
 
-  const html = subData.groups.map((g, gi) => `
-    <div class="group-section">
-      <div class="group-header ${groupClass}" onclick="toggleGroup(${gi})">
-        <div class="group-icon">${g.icon}</div>
-        <div class="group-info">
-          <div class="group-name">${g.name}</div>
-          <div class="group-sub">${g.sub}</div>
-        </div>
-        <div class="group-chevron" id="chevron-${gi}">▶</div>
-      </div>
-      <div class="recipe-list" id="group-${gi}">
-        ${g.recipes.map((r, ri) => `
-          <div class="recipe-item" onclick="selectRecipe(${gi}, ${ri})">
-            <div style="font-size:28px">${r.emoji}</div>
-            <div class="recipe-item-info">
-              <div class="recipe-item-name">${r.name}</div>
-              <div class="recipe-item-meta">${g.sub}</div>
-              <div class="recipe-item-badges">
-                <span class="badge badge-age-${colorClass}">${r.age}</span>
-                <span class="badge badge-time">⏱ ${r.time}</span>
-                <span class="badge badge-time">${r.difficulty}</span>
-              </div>
+  let html
+  if (subData.groups.length === 1) {
+    // 단일 그룹: 헤더 없이 레시피 목록 바로 표시
+    const g = subData.groups[0]
+    html = `<div style="display:flex;flex-direction:column;gap:8px;padding:4px 0">` +
+      g.recipes.map((r, ri) => `
+        <div class="recipe-item" onclick="selectRecipe(0, ${ri})">
+          <div style="font-size:28px">${r.emoji}</div>
+          <div class="recipe-item-info">
+            <div class="recipe-item-name">${r.name}</div>
+            <div class="recipe-item-badges">
+              <span class="badge badge-age-${colorClass}">${r.age}</span>
+              <span class="badge badge-time">⏱ ${r.time}</span>
+              <span class="badge badge-time">${r.difficulty}</span>
             </div>
-            <div class="recipe-arrow">›</div>
           </div>
-        `).join('')}
+          <div class="recipe-arrow">›</div>
+        </div>
+      `).join('') + `</div>`
+  } else {
+    // 다중 그룹: 기존 토글 방식
+    html = subData.groups.map((g, gi) => `
+      <div class="group-section">
+        <div class="group-header ${groupClass}" onclick="toggleGroup(${gi})">
+          <div class="group-icon">${g.icon}</div>
+          <div class="group-info">
+            <div class="group-name">${g.name}</div>
+            <div class="group-sub">${g.sub}</div>
+          </div>
+          <div class="group-chevron" id="chevron-${gi}">▶</div>
+        </div>
+        <div class="recipe-list" id="group-${gi}">
+          ${g.recipes.map((r, ri) => `
+            <div class="recipe-item" onclick="selectRecipe(${gi}, ${ri})">
+              <div style="font-size:28px">${r.emoji}</div>
+              <div class="recipe-item-info">
+                <div class="recipe-item-name">${r.name}</div>
+                <div class="recipe-item-meta">${g.sub}</div>
+                <div class="recipe-item-badges">
+                  <span class="badge badge-age-${colorClass}">${r.age}</span>
+                  <span class="badge badge-time">⏱ ${r.time}</span>
+                  <span class="badge badge-time">${r.difficulty}</span>
+                </div>
+              </div>
+              <div class="recipe-arrow">›</div>
+            </div>
+          `).join('')}
+        </div>
       </div>
-    </div>
-  `).join('')
+    `).join('')
+  }
 
   document.getElementById('page-list').innerHTML = html
   navigate('page-list', { sub })
