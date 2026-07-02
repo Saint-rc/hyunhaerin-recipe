@@ -268,6 +268,42 @@
       background: #F0F0F0; font-size: 15px; font-weight: 600;
       cursor: pointer; font-family: 'Noto Sans KR', sans-serif;
     }
+
+    /* ── 인스타 영상 버튼 + 모달 ── */
+    .insta-btn {
+      width: 100%; border: none; border-radius: 14px; padding: 15px;
+      margin-bottom: 20px; cursor: pointer;
+      font-family: 'Noto Sans KR', sans-serif;
+      font-size: 15px; font-weight: 700; color: #fff;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: linear-gradient(90deg, #F58529, #DD2A7B, #8134AF, #515BD4);
+      box-shadow: 0 4px 14px rgba(221,42,123,.28);
+    }
+    .insta-btn:active { transform: scale(.98); opacity: .92; }
+    .insta-btn .insta-play {
+      width: 22px; height: 22px; border-radius: 6px;
+      background: rgba(255,255,255,.22);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+    #insta-modal {
+      display: none; position: fixed; inset: 0; z-index: 400;
+      background: rgba(0,0,0,.88); padding: 16px;
+      flex-direction: column; align-items: center; justify-content: center;
+    }
+    #insta-modal.open { display: flex; }
+    #insta-wrap { width: min(420px, 94vw); }
+    #insta-close {
+      display: block; margin: 0 0 10px auto;
+      width: 38px; height: 38px; border-radius: 50%; border: none;
+      background: rgba(255,255,255,.16); color: #fff;
+      font-size: 20px; line-height: 1; cursor: pointer;
+    }
+    #insta-box {
+      width: 100%; height: min(78vh, 700px);
+      background: #fff; border-radius: 16px; overflow: hidden;
+    }
+    #insta-box iframe { width: 100%; height: 100%; border: none; }
   </style>
 </head>
 <body>
@@ -288,6 +324,14 @@
       <div class="ios-step"><div class="ios-step-num">3</div><span>오른쪽 상단 <b>추가</b> 탭</span></div>
     </div>
     <button id="ios-close" onclick="document.getElementById('ios-modal').classList.remove('open')">확인</button>
+  </div>
+</div>
+
+<!-- 인스타 영상 모달 -->
+<div id="insta-modal" onclick="closeInsta(event)">
+  <div id="insta-wrap">
+    <button id="insta-close" onclick="closeInsta()" aria-label="닫기">✕</button>
+    <div id="insta-box"></div>
   </div>
 </div>
 
@@ -368,14 +412,14 @@ const DATA = {
     emoji: '🍼',
     color: 'baby',
     subs: {
-      '밥': {
-        emoji: '🍚',
-        count: '5가지 레시피',
+      '전체': {
+        emoji: '🍼',
+        count: '13가지 레시피',
         groups: [
           {
-            icon: '🌱',
-            name: '초기 이유식',
-            sub: '4~6개월 · 미음·묽은죽',
+            icon: '🍼',
+            name: '전체 레시피',
+            sub: '이유식 전체 레시피 모음',
             recipes: [
               {
                 name: '쌀미음',
@@ -416,13 +460,6 @@ const DATA = {
                   '체에 걸러 그릇에 담고 식혀서 먹인다.',
                 ]
               },
-            ]
-          },
-          {
-            icon: '🥕',
-            name: '중기 이유식',
-            sub: '7~9개월 · 야채죽',
-            recipes: [
               {
                 name: '소고기당근죽',
                 emoji: '🥩',
@@ -491,14 +528,7 @@ const DATA = {
                   '끓기 시작하면 갈아둔 채소를 넣고 약불에서 15분 더 끓인다.',
                   '잘 섞어가며 완성한 후 식혀서 먹인다.',
                 ]
-              }
-            ]
-          },
-          {
-            icon: '🍚',
-            name: '후기 이유식',
-            sub: '10~12개월 · 진밥·무른밥',
-            recipes: [
+              },
               {
                 name: '소고기채소진밥',
                 emoji: '🥩',
@@ -523,19 +553,6 @@ const DATA = {
                   '쌀알이 무르고 채소가 푹 익으면 완성. 식혀서 먹인다.',
                 ]
               },
-            ]
-          }
-        ]
-      },
-      '간식': {
-        emoji: '🍎',
-        count: '4가지 레시피',
-        groups: [
-          {
-            icon: '🍑',
-            name: '과일 간식',
-            sub: '소화 잘 되는 달콤한 간식',
-            recipes: [
               {
                 name: '사과배퓨레',
                 emoji: '🍎',
@@ -574,14 +591,7 @@ const DATA = {
                   '더 부드럽게 만들려면 소량의 모유나 분유물을 넣고 섞는다.',
                   '즉시 먹인다. (변색되므로 미리 만들지 않는다)',
                 ]
-              }
-            ]
-          },
-          {
-            icon: '🍠',
-            name: '채소 간식',
-            sub: '영양 가득 달콤한 채소',
-            recipes: [
+              },
               {
                 name: '찐고구마',
                 emoji: '🍠',
@@ -619,7 +629,72 @@ const DATA = {
                   '중기: 포크로 으깨어 덩어리째 제공',
                   '후기: 작게 썰어 손으로 집어 먹을 수 있는 크기로 제공',
                 ]
-              }
+              },
+              {
+                name: '분유빵',
+                emoji: '🍞',
+                image: 'images/baby/snack/1.jpg',
+                age: '9개월+',
+                time: '5분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reels/DYAJLwZTw6o/',
+                tip: '분유물·분유·달걀만 섞어 전자레인지로 만드는 간식이에요. 자주는 아니지만 가끔 주면 아이가 정말 좋아해요.',
+                ingredients: [
+                  { name: '분유물', amount: '20ml' },
+                  { name: '분유', amount: '5스푼' },
+                  { name: '달걀', amount: '1개' },
+                ],
+                steps: [
+                  '분유물·분유·달걀을 모두 넣고 잘 섞는다.',
+                  '전자레인지에 2분 정도 돌린다.',
+                  '검지 길이로 핑거푸드처럼 잘라 한 김 식혀 먹인다.',
+                ]
+              },
+              {
+                name: '브로콜리감자매쉬볼',
+                emoji: '🥦',
+                image: 'images/baby/snack/2.jpg',
+                age: '7개월+',
+                time: '25분',
+                difficulty: '보통',
+                instagram: 'https://www.instagram.com/reels/DYZ3r2KJ8M1/',
+                tip: '겉은 퐁신 속은 촉촉한 매쉬볼! 생후 7~8개월(중기) 이후 추천이에요. 아이가 이미 먹어본 재료인지 확인하고, 7개월은 치즈 양을 줄여 담백하게 시작해요.',
+                ingredients: [
+                  { name: '찐 감자', amount: '100g (중간 크기 1개)' },
+                  { name: '브로콜리 (데쳐 물기 짠 것)', amount: '20g' },
+                  { name: '아기 치즈 (1단계)', amount: '1/2~2/3장' },
+                  { name: '쌀가루', amount: '1큰술 (8~10g)' },
+                ],
+                steps: [
+                  '감자는 푹 쪄서 뜨거울 때 매셔로 부드럽게 으깬다.',
+                  '데친 브로콜리는 꽃송이 부분만 아주 잘게 다진다.',
+                  '으깬 감자에 다진 브로콜리·치즈·쌀가루를 넣고 섞는다. (말랑한 찰흙처럼 손에 묻지 않는 점도가 딱! 푸석하면 분유물 조금, 질면 쌀가루 조금.)',
+                  '아기 한입 크기로 동글동글 빚는다.',
+                  '에어프라이어 180도에서 8분 구운 뒤 뒤집어 2분 더. (오븐은 170도 예열 후 10분)',
+                ]
+              },
+              {
+                name: '당근스프',
+                emoji: '🥕',
+                image: 'images/baby/snack/3.jpg',
+                age: '9개월+',
+                time: '40분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reels/DVGX1nmD794/',
+                tip: '당근·양파를 푹 쪄서 갈고 치즈·분유로 꾸덕하게 만든 스프예요. 자연 단맛이 좋아 아이가 잘 먹어요.',
+                ingredients: [
+                  { name: '당근', amount: '2개' },
+                  { name: '양파', amount: '1/2개' },
+                  { name: '아기 치즈', amount: '1장' },
+                  { name: '분유', amount: '조금' },
+                ],
+                steps: [
+                  '당근과 양파를 깍둑썰기한다.',
+                  '당근과 양파를 30분간 찐다.',
+                  '익은 당근·양파를 먼저 갈고, 치즈 1장과 분유 조금을 넣어 한 번 더 간다.',
+                  '꾸덕꾸덕해지면 완성.',
+                ]
+              },
             ]
           }
         ]
@@ -633,7 +708,7 @@ const DATA = {
     subs: {
       '밥': {
         emoji: '🍳',
-        count: '26가지 레시피',
+        count: '29가지 레시피',
         groups: [
           {
             icon: '🍳',
@@ -1332,7 +1407,89 @@ const DATA = {
                   '뚜껑을 닫고 전자레인지에 1분 40초 돌린다.',
                   '뜨거운 밥 위에 올리고 고루 비벼 완성한다.',
                 ]
-              }
+              },
+              {
+                name: '사골 미역밥',
+                emoji: '🍲',
+                image: 'images/toddler/rice/34.jpg',
+                age: '12개월+',
+                time: '15분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reel/DYhbk2HCeHV/',
+                tip: '곰탕 국물과 곰탕 고기에 미역만 넣어 한 그릇 뚝딱! 물 대신 사골곰탕을 베이스로 쓰면 같은 양이라도 더 영양가 있게 먹일 수 있어요.',
+                ingredients: [
+                  { name: '양파', amount: '20g' },
+                  { name: '미역 (불리기 전)', amount: '1g' },
+                  { name: '밥', amount: '100g' },
+                  { name: '사골곰탕', amount: '100ml' },
+                  { name: '곰탕 고기', amount: '20g' },
+                  { name: '참기름', amount: '약간' },
+                  { name: '소금', amount: '1티스푼' },
+                ],
+                steps: [
+                  '참기름을 두르고 양파를 볶다가 미역도 충분히 볶는다. (참기름을 넣었으니 저온에서 조리하고, 미역을 충분히 볶아 비린맛을 날려요.)',
+                  '미역이 볶아지면 곰탕 국물과 잘게 자른 곰탕 고기를 넣는다.',
+                  '소금을 소량 넣어 간한다. (곰탕엔 소금이 잘 어울려요. 간장도 가능해요!)',
+                  '밥을 넣어 함께 섞는다.',
+                  '그릇에 담고 참기름과 깨를 뿌려 마무리한다.',
+                ]
+              },
+              {
+                name: '대패삼겹밥',
+                emoji: '🥓',
+                image: 'images/toddler/rice/35.jpg',
+                age: '18개월+',
+                time: '40분',
+                difficulty: '보통',
+                instagram: 'https://www.instagram.com/reels/DXsy2DPCQbW/',
+                tip: '대패삼겹살과 콩나물을 밥솥에 올려 백미취사 한 번이면 끝나는 솥밥이에요. 아이는 간 없이 그대로, 어른은 양념장을 곁들이면 온 가족 한 끼! (1T=15ml)',
+                ingredients: [
+                  { name: '대패삼겹살', amount: '400g' },
+                  { name: '쌀', amount: '2컵 반' },
+                  { name: '콩나물', amount: '250g' },
+                  { name: '양파', amount: '작은 것 1/2개' },
+                  { name: '간장', amount: '1T' },
+                  { name: '알룰로스', amount: '1T' },
+                  { name: '다진마늘', amount: '1/2T' },
+                  { name: '맛술', amount: '1/2T' },
+                  { name: '순후추', amount: '약간' },
+                ],
+                steps: [
+                  '대패삼겹살 400g에 간장 1T·알룰로스 1T·다진마늘 1/2T·맛술 1/2T·순후추를 넣어 양념한다. (통후추는 향이 강하니 순후추를 써요.)',
+                  '양파 1/2개를 작게 썰어 고기와 함께 버무린다.',
+                  '쌀 2컵 반을 씻어 밥솥에 넣고, 평소 밥물의 절반만 넣는다. (쌀 위 0.5cm 정도 — 쌀마다 다르니 평소보다 덜 잡아요.)',
+                  '씻은 콩나물을 쌀 위에 올리고, 양념한 고기를 올려 백미취사한다.',
+                  '밥이 설익었으면 재가열을 한 번 더 돌린다.',
+                  '아이용은 그대로, 간이 부족하면 간장만 조금 넣어 비벼준다. (어른 양념장: 간장 3T·고춧가루 2T·가루알룰로스 2T·다진마늘 1/2T·다진 대파 한 줌·통깨, 매우면 청양고추)',
+                ]
+              },
+              {
+                name: '순두부된장죽',
+                emoji: '🍲',
+                image: 'images/toddler/rice/36.jpg',
+                age: '12개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reels/DaAkK-2OB-J/',
+                tip: '순두부와 아기된장으로 부드럽게 끓인 죽이에요. 완밥 보장! 무염 아가는 간장·마늘을 빼고 만들어요.',
+                ingredients: [
+                  { name: '밥', amount: '90g' },
+                  { name: '순두부', amount: '80g' },
+                  { name: '감자', amount: '작은 것 1개' },
+                  { name: '버섯', amount: '20g' },
+                  { name: '물', amount: '300ml' },
+                  { name: '아기된장', amount: '1스푼' },
+                  { name: '아기간장', amount: '1스푼' },
+                  { name: '다진마늘', amount: '소량' },
+                ],
+                steps: [
+                  '버섯 20g과 감자 작은 것 1개를 작게 깍둑썰어 준비한다.',
+                  '물 300ml에 아기된장 1스푼을 풀고 썰어둔 재료를 넣는다.',
+                  '아기간장 1스푼과 다진마늘 소량을 넣는다. (무염 아가는 생략 가능)',
+                  '밥 90g과 순두부 80g을 넣고 으깨면서 저어준다.',
+                  '원하는 농도가 될 때까지 약불에서 끓이면 완성.',
+                ]
+              },
             ]
           }
         ]
@@ -1443,7 +1600,7 @@ const DATA = {
       },
       '반찬': {
         emoji: '🥗',
-        count: '12가지 레시피',
+        count: '14가지 레시피',
         groups: [
           {
             icon: '🥗',
@@ -1768,14 +1925,60 @@ const DATA = {
                   '팬에 기름을 두르고 대파를 먼저 볶아 파기름을 낸다.',
                   '양념한 갈비를 넣고 고기가 완전히 익을 때까지 함께 볶아 완성한다.',
                 ]
-              }
+              },
+              {
+                name: '아기 김전',
+                emoji: '🍘',
+                image: 'images/toddler/side/18.jpg',
+                age: '12개월+',
+                time: '5분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reels/DX1Ud-RTVd5/',
+                tip: '밥태기 극복용 5분 반찬! 진맛김 2봉이면 9장 나와요. 냉장 보관하고 아이가 손으로 집어 먹기 좋아요.',
+                ingredients: [
+                  { name: '김 (진맛김)', amount: '2봉 (김 2장 기준)' },
+                  { name: '계란', amount: '1개' },
+                  { name: '애호박', amount: '30g' },
+                  { name: '통깨', amount: '약간' },
+                  { name: '오일', amount: '약간' },
+                ],
+                steps: [
+                  '계란 1개를 풀고, 애호박 30g을 아주 작게 자른다.',
+                  '김 2장을 겹쳐 계란물을 묻히고, 오일 두른 팬에 약불로 올린다.',
+                  '계란이 다 익기 전에 애호박과 통깨를 조금씩 올린 뒤, 1~2번 뒤집어가며 굽는다. (이때 살짝 눌러줘도 좋아요.)',
+                ]
+              },
+              {
+                name: '브로콜리두부전',
+                emoji: '🥦',
+                image: 'images/toddler/side/19.jpg',
+                age: '12개월+',
+                time: '20분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reels/DZ85On3vBxJ/',
+                tip: '브로콜리 싫어하는 아이도 잘 먹는 두부전이에요. 브로콜리는 잘게 다지고 두부는 물기를 꽉 짜는 게 포인트!',
+                ingredients: [
+                  { name: '브로콜리', amount: '100g' },
+                  { name: '두부 (단단한 것)', amount: '100g' },
+                  { name: '계란', amount: '1알' },
+                  { name: '요리한끗 (생략 가능)', amount: '1포' },
+                  { name: '소금', amount: '약간' },
+                  { name: '기버터', amount: '약간' },
+                ],
+                steps: [
+                  '브로콜리 100g을 찜기에 찐 뒤 잘게 다진다. (잘게 다질수록 좋아요.)',
+                  '두부 100g은 물기를 꽉 제거한다. (단단한 두부가 좋아요.)',
+                  '볼에 브로콜리·두부·계란 1알·요리한끗 1포(생략 가능)·소금을 넣고 잘 섞는다.',
+                  '팬에 기버터를 두르고 앞뒤로 노릇하게 구우면 완성.',
+                ]
+              },
             ]
           }
         ]
       },
       '간식': {
         emoji: '🧁',
-        count: '13가지 레시피',
+        count: '15가지 레시피',
         groups: [
           {
             icon: '🧁',
@@ -2068,7 +2271,52 @@ const DATA = {
                   '포크로 으깨거나 블렌더에 살짝 갈아 소르베 질감을 만든다.',
                   '레몬즙이나 알룰로스를 넣고 섞은 뒤 바로 제공한다.',
                 ]
-              }
+              },
+              {
+                name: '감자빵',
+                emoji: '🥔',
+                image: 'images/toddler/snack/16.jpg',
+                age: '12개월+',
+                time: '10분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reels/DYo4RtuKcxL/',
+                tip: '찐 감자에 쌀가루·계란만 섞어 전자레인지로 완성하는 폭신한 간식이에요. 오븐·에어프라이어 없이 간단해요.',
+                ingredients: [
+                  { name: '찐 감자', amount: '100g' },
+                  { name: '우유', amount: '30ml' },
+                  { name: '쌀가루', amount: '30g' },
+                  { name: '계란', amount: '1알' },
+                ],
+                steps: [
+                  '감자를 전자레인지에 익힌 뒤 으깬다.',
+                  '우유·쌀가루·계란을 넣고 잘 섞는다.',
+                  '그릇을 톡톡 쳐서 기포를 뺀다.',
+                  '전자레인지에 2분 30초 돌리면 완성.',
+                ]
+              },
+              {
+                name: '계란 쌀빵 (단호박·바나나)',
+                emoji: '🍌',
+                image: 'images/toddler/snack/17.jpg',
+                age: '12개월+',
+                time: '5분',
+                difficulty: '쉬움',
+                instagram: 'https://www.instagram.com/reels/DXOSJDdAGcv/',
+                tip: '쌀가루·노른자에 단호박 또는 바나나만 더해 전자레인지로 만드는 쌀빵이에요. 슈가스팟 바나나를 쓰면 설탕 없이도 달아요. 노른자만 쓰면 퍽퍽할 수 있어 물(분유)로 농도를 조절해요.',
+                ingredients: [
+                  { name: '① 단호박 · 쌀가루', amount: '30g' },
+                  { name: '① 단호박 · 계란 노른자', amount: '1개' },
+                  { name: '① 단호박 · 찐 단호박', amount: '40g' },
+                  { name: '② 바나나 · 쌀가루', amount: '30g' },
+                  { name: '② 바나나 · 계란 노른자', amount: '1개' },
+                  { name: '② 바나나 · 잘 익은 바나나', amount: '1/2개 (50g)' },
+                ],
+                steps: [
+                  '원하는 맛(단호박 또는 바나나)의 재료를 모두 섞어 내열용기에 담는다.',
+                  '전자레인지에 2분~2분 30초 돌린다. (2분 돌리고 겉면이 덜 익었으면 30초 더.)',
+                  '노른자만 쓰면 퍽퍽할 수 있으니, 반죽이 되면 물(분유)로 농도를 조절한다.',
+                ]
+              },
             ]
           }
         ]
@@ -2227,6 +2475,28 @@ function closeIosModal(e) {
   }
 }
 
+// ── 인스타 영상 모달 ──
+function instaEmbedUrl(url) {
+  const m = url.match(/instagram\.com\/(reel|reels|p|tv)\/([A-Za-z0-9_-]+)/)
+  if (m) {
+    const type = m[1] === 'reels' ? 'reel' : m[1]
+    return `https://www.instagram.com/${type}/${m[2]}/embed/captioned/`
+  }
+  return url
+}
+function openInsta(url) {
+  document.getElementById('insta-box').innerHTML =
+    `<iframe src="${instaEmbedUrl(url)}" allowtransparency="true" scrolling="no" frameborder="0" ` +
+    `allow="autoplay; encrypted-media; clipboard-write; picture-in-picture"></iframe>`
+  document.getElementById('insta-modal').classList.add('open')
+}
+function closeInsta(e) {
+  const modal = document.getElementById('insta-modal')
+  if (e && e.target !== modal && e.target.id !== 'insta-close') return
+  modal.classList.remove('open')
+  document.getElementById('insta-box').innerHTML = ''  // 영상 재생 중지
+}
+
 function navigate(pageId, newState = {}) {
   history.push(document.querySelector('.page.active')?.id)
   state = { ...state, ...newState }
@@ -2266,12 +2536,15 @@ function updateHeader() {
     title.textContent = `${d.emoji} ${state.category}`
     bc.textContent = ''
   } else if (!state.recipe) {
-    const sub = DATA[state.category].subs[state.sub]
-    title.textContent = `${sub.emoji} ${state.sub}`
-    bc.textContent = state.category
+    const d = DATA[state.category]
+    const singleSub = Object.keys(d.subs).length === 1
+    const sub = d.subs[state.sub]
+    title.textContent = singleSub ? `${d.emoji} ${state.category}` : `${sub.emoji} ${state.sub}`
+    bc.textContent = singleSub ? '' : state.category
   } else {
+    const singleSub = Object.keys(DATA[state.category].subs).length === 1
     title.textContent = state.recipe.name
-    bc.textContent = `${state.category} > ${state.sub}`
+    bc.textContent = singleSub ? state.category : `${state.category} > ${state.sub}`
   }
 }
 
@@ -2282,6 +2555,13 @@ function selectCategory(cat) {
   const d = DATA[cat]
   const subs = Object.entries(d.subs)
   const colorClass = d.color
+
+  // 서브카테고리가 1개면 선택 화면을 건너뛰고 바로 레시피 목록으로
+  if (subs.length === 1) {
+    state = { ...state, category: cat }
+    selectSub(subs[0][0])
+    return
+  }
 
   const html = `
     <div class="section-label">${cat} 소카테고리</div>
@@ -2396,6 +2676,12 @@ function selectRecipe(gi, ri) {
       <div class="tip-title">💡 이런 레시피예요</div>
       <div class="tip-text">${recipe.tip}</div>
     </div>
+
+    ${recipe.instagram ? `
+    <button class="insta-btn" onclick="openInsta('${recipe.instagram}')">
+      <span class="insta-play">▶</span> 인스타 영상 보면서 따라하기
+    </button>
+    ` : ''}
 
     <div class="recipe-section">
       <div class="recipe-section-title">🛒 재료</div>
